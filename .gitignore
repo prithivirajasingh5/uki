@@ -1,0 +1,13 @@
+.env
+.env.local
+CLAUDE.local.md
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+dist/
+build/
+work/
+rootfs/
+*.squashfs
+*.efi
