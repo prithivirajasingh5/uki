@@ -30,6 +30,13 @@ copy_with_libs() {
 rm -rf "$IDIR"
 mkdir -p "$IDIR"/{bin,sbin,dev,etc,lib,lib64,proc,sys,newroot,run}
 
+# Pre-create essential device nodes so the kernel can open /dev/console for
+# PID 1 stdio before devtmpfs is mounted; without these the kernel falls back
+# to /dev/null and all init output is silently discarded.
+mknod -m 0600 "$IDIR/dev/console" c 5 1
+mknod -m 0666 "$IDIR/dev/null"    c 1 3
+mknod -m 0660 "$IDIR/dev/tty"     c 5 0
+
 # busybox provides: sh, mount, umount, mkdir, mknod, switch_root, echo
 BUSYBOX=$(command -v busybox || true)
 if [ -z "$BUSYBOX" ]; then
