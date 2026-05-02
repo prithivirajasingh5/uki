@@ -72,17 +72,32 @@ if [ -d "/lib/modules/$KVER" ]; then
     echo "Copying kernel modules ($KVER) — this may take a minute..."
     mkdir -p "$ROOTFS/lib/modules"
     cp -a "/lib/modules/$KVER" "$ROOTFS/lib/modules/"
+    # Drop modules that are useless in a text-console rescue image.
+    # GPU: no display compositor; sound: no audio; media: no webcam/DVB.
+    KMOD="$ROOTFS/lib/modules/$KVER/kernel"
+    rm -rf "$KMOD/drivers/gpu" "$KMOD/sound" "$KMOD/drivers/media"
     depmod -b "$ROOTFS" "$KVER"
 else
     echo "warning: /lib/modules/$KVER not found — NVMe/NIC drivers will not load" >&2
 fi
 
 # Firmware blobs — required for WiFi (regulatory.db, iwlwifi-*.ucode, etc.)
-# and many NIC/GPU/HBA controllers. Copy whatever the build host has.
+# and many NIC controllers. Copy from the build host then strip firmware that
+# a text-console rescue system will never use, to keep the EFI image small.
 if [ -d /lib/firmware ]; then
     echo "Copying firmware files — this may take a minute..."
     mkdir -p "$ROOTFS/lib/firmware"
     cp -a /lib/firmware/. "$ROOTFS/lib/firmware/"
+    FW="$ROOTFS/lib/firmware"
+    # GPU firmware — rescue runs on a text console, no display driver needed
+    rm -rf "$FW/nvidia" "$FW/amdgpu" "$FW/radeon" "$FW/i915" "$FW/xe"
+    # Enterprise/datacenter NICs — Mellanox InfiniBand, Marvell HBAs,
+    # Netronome SmartNICs, QLogic qed, NXP dpaa2: not in consumer rescue targets
+    rm -rf "$FW/mellanox" "$FW/mrvl" "$FW/netronome" "$FW/qed" "$FW/dpaa2"
+    # Qualcomm mobile SoC firmware — not relevant on x86 rescue hardware
+    rm -rf "$FW/qcom"
+    # Audio codec firmware — no sound needed in rescue
+    rm -rf "$FW/cirrus"
 fi
 
 # Clean package cache
