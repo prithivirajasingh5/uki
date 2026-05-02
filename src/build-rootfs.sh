@@ -42,6 +42,10 @@ echo "tmpfs / tmpfs defaults 0 0" > "$ROOTFS/etc/fstab"
 # Hostname
 echo "rescue" > "$ROOTFS/etc/hostname"
 
+# debootstrap --variant=minbase skips postinst scripts that normally create
+# /sbin/init -> /lib/systemd/systemd; create it explicitly.
+ln -sf /lib/systemd/systemd "$ROOTFS/usr/sbin/init"
+
 # Clean package cache
 rm -rf "$ROOTFS/var/cache/apt/archives"/*.deb \
        "$ROOTFS/var/lib/apt/lists"/*

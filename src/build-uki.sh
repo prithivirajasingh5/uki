@@ -6,7 +6,7 @@ OUTPUT=rescue.efi
 CMDLINE="console=ttyS0 console=tty0 quiet"
 
 if [ -z "${KERNEL:-}" ]; then
-    KERNEL=$(ls /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
+    KERNEL=$(find /boot -maxdepth 1 -name 'vmlinuz-*' 2>/dev/null | sort -V | tail -1)
 fi
 
 if [ -z "$KERNEL" ] || [ ! -f "$KERNEL" ]; then

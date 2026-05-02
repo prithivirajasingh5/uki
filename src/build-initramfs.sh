@@ -13,18 +13,13 @@ fi
 # Copy a binary and all its dynamic libraries into $IDIR
 copy_with_libs() {
     local bin="$1"
-    local dest="$IDIR/bin/$(basename "$bin")"
+    local dest
+    dest="$IDIR/bin/$(basename "$bin")"
     cp "$bin" "$dest"
     chmod +x "$dest"
-    ldd "$bin" 2>/dev/null | while read -r line; do
-        local lib
-        if echo "$line" | grep -q '=>'; then
-            lib=$(echo "$line" | awk '{ print $3 }')
-        elif echo "$line" | grep -qE '^\s+/'; then
-            lib=$(echo "$line" | awk '{ print $1 }')
-        else
-            continue
-        fi
+    # Extract every absolute path from ldd output (handles both "=> /path" and
+    # the bare interpreter line "/lib64/ld-linux-x86-64.so.2")
+    ldd "$bin" 2>/dev/null | grep -oE '/[^ ]+' | while read -r lib; do
         [ -f "$lib" ] || continue
         local libdest="$IDIR$lib"
         mkdir -p "$(dirname "$libdest")"
