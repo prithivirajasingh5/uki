@@ -24,6 +24,7 @@ PACKAGES=(
     iproute2
     openssh-client
     squashfs-tools   # provides unsquashfs inside the running rescue system
+    kmod             # provides modprobe/depmod for the rescue shell
 )
 
 IFS=',' INCLUDE="${PACKAGES[*]}"
@@ -61,6 +62,28 @@ done
 # Ensure sbin paths are in PATH — minbase Debian shells often omit /usr/sbin
 echo 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
     > "$ROOTFS/etc/profile.d/path.sh"
+
+# Kernel modules — must match the kernel embedded in the UKI.
+# The UKI build picks /boot/vmlinuz-$(KVER), so we copy the matching modules
+# from the build host. Without these, udev can't load any drivers after
+# switch_root (no NVMe, no NIC, no USB storage).
+KVER=$(uname -r)
+if [ -d "/lib/modules/$KVER" ]; then
+    echo "Copying kernel modules ($KVER) — this may take a minute..."
+    mkdir -p "$ROOTFS/lib/modules"
+    cp -a "/lib/modules/$KVER" "$ROOTFS/lib/modules/"
+    depmod -b "$ROOTFS" "$KVER"
+else
+    echo "warning: /lib/modules/$KVER not found — NVMe/NIC drivers will not load" >&2
+fi
+
+# Firmware blobs — required for WiFi (regulatory.db, iwlwifi-*.ucode, etc.)
+# and many NIC/GPU/HBA controllers. Copy whatever the build host has.
+if [ -d /lib/firmware ]; then
+    echo "Copying firmware files — this may take a minute..."
+    mkdir -p "$ROOTFS/lib/firmware"
+    cp -a /lib/firmware/. "$ROOTFS/lib/firmware/"
+fi
 
 # Clean package cache
 rm -rf "$ROOTFS/var/cache/apt/archives"/*.deb \
