@@ -19,9 +19,18 @@ if [ ! -f "$INITRAMFS" ]; then
     exit 1
 fi
 
+# Ubuntu sets /boot/vmlinuz-* to root:root 600; copy to a readable temp file
+BOOT_KERNEL="$KERNEL"
+if [ ! -r "$KERNEL" ]; then
+    BOOT_KERNEL=$(mktemp /tmp/vmlinuz.XXXXXX)
+    sudo cp "$KERNEL" "$BOOT_KERNEL"
+    sudo chmod 644 "$BOOT_KERNEL"
+    trap 'rm -f "$BOOT_KERNEL"' EXIT
+fi
+
 echo "Building UKI: kernel=$KERNEL"
 ukify build \
-    --linux "$KERNEL" \
+    --linux "$BOOT_KERNEL" \
     --initrd "$INITRAMFS" \
     --cmdline "$CMDLINE" \
     --output "$OUTPUT"
