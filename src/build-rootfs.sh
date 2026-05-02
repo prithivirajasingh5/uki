@@ -25,6 +25,9 @@ PACKAGES=(
     openssh-client
     squashfs-tools   # provides unsquashfs inside the running rescue system
     kmod             # provides modprobe/depmod for the rescue shell
+    dbus             # required by iwd — provides dbus.socket/dbus.service
+    systemd-sysv     # provides poweroff/reboot/halt/shutdown as systemctl symlinks
+    udev             # auto-loads kernel modules from pci/usb aliases on boot
 )
 
 IFS=',' INCLUDE="${PACKAGES[*]}"
@@ -50,6 +53,11 @@ ln -sf /lib/systemd/systemd "$ROOTFS/usr/sbin/init"
 # nvme-cli ships nvmf-autoconnect.service which probes for NVMe-oF network
 # targets on boot — always fails in a rescue context, so mask it.
 systemctl --root="$ROOTFS" mask nvmf-autoconnect.service
+
+# debootstrap --variant=minbase skips the postinst hooks that would normally
+# enable services via deb-systemd-helper. Enable iwd explicitly so it starts
+# on boot and manages any wifi interface that udev hands it.
+systemctl --root="$ROOTFS" enable iwd
 
 # Auto-login root on tty1 (physical console) and ttyS0 (QEMU serial).
 for tty in tty1 ttyS0; do
