@@ -5,7 +5,7 @@ SQUASHFS  := $(WORK)/root.squashfs
 INITRAMFS := $(WORK)/initramfs.cpio.gz
 OUTPUT    := rescue.efi
 
-.PHONY: all rootfs squashfs initramfs uki clean test
+.PHONY: all rootfs squashfs initramfs uki run clean test
 
 all: uki
 
@@ -25,6 +25,9 @@ $(INITRAMFS): $(SQUASHFS)
 uki: $(OUTPUT)
 $(OUTPUT): $(INITRAMFS)
 	KERNEL=$(KERNEL) bash src/build-uki.sh
+
+run: $(OUTPUT)
+	bash src/run-qemu.sh
 
 clean:
 	rm -rf $(WORK) $(OUTPUT)
