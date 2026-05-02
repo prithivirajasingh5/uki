@@ -1,0 +1,69 @@
+#!/bin/bash
+set -euo pipefail
+
+SQUASHFS=work/root.squashfs
+IDIR=work/initramfs
+INITRAMFS=work/initramfs.cpio.gz
+
+if [ ! -f "$SQUASHFS" ]; then
+    echo "error: $SQUASHFS not found — run 'make squashfs' first" >&2
+    exit 1
+fi
+
+# Copy a binary and all its dynamic libraries into $IDIR
+copy_with_libs() {
+    local bin="$1"
+    local dest="$IDIR/bin/$(basename "$bin")"
+    cp "$bin" "$dest"
+    chmod +x "$dest"
+    ldd "$bin" 2>/dev/null | while read -r line; do
+        local lib
+        if echo "$line" | grep -q '=>'; then
+            lib=$(echo "$line" | awk '{ print $3 }')
+        elif echo "$line" | grep -qE '^\s+/'; then
+            lib=$(echo "$line" | awk '{ print $1 }')
+        else
+            continue
+        fi
+        [ -f "$lib" ] || continue
+        local libdest="$IDIR$lib"
+        mkdir -p "$(dirname "$libdest")"
+        cp -L "$lib" "$libdest"
+    done
+}
+
+rm -rf "$IDIR"
+mkdir -p "$IDIR"/{bin,sbin,dev,etc,lib,lib64,proc,sys,newroot,run}
+
+# busybox provides: sh, mount, umount, mkdir, mknod, switch_root, echo
+BUSYBOX=$(command -v busybox || true)
+if [ -z "$BUSYBOX" ]; then
+    echo "error: busybox not found — install busybox-static" >&2
+    exit 1
+fi
+cp "$BUSYBOX" "$IDIR/bin/busybox"
+chmod +x "$IDIR/bin/busybox"
+
+for cmd in sh mount umount mkdir mknod switch_root echo; do
+    ln -sf busybox "$IDIR/bin/$cmd"
+done
+
+# unsquashfs — needed to extract the rootfs (dynamically linked, copy with libs)
+UNSQUASHFS=$(command -v unsquashfs || true)
+if [ -z "$UNSQUASHFS" ]; then
+    echo "error: unsquashfs not found — install squashfs-tools" >&2
+    exit 1
+fi
+copy_with_libs "$UNSQUASHFS"
+
+# init script
+install -m 0755 src/initramfs/init "$IDIR/init"
+
+# squashfs image
+cp "$SQUASHFS" "$IDIR/root.squashfs"
+
+# pack into cpio.gz
+echo "Packing initramfs..."
+(cd "$IDIR" && find . | cpio -oH newc) | gzip -9 > "$INITRAMFS"
+
+echo "Done: $INITRAMFS ($(du -sh "$INITRAMFS" | cut -f1))"
