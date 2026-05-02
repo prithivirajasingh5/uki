@@ -58,6 +58,10 @@ for tty in tty1 ttyS0; do
         > "$dir/autologin.conf"
 done
 
+# Ensure sbin paths are in PATH — minbase Debian shells often omit /usr/sbin
+echo 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+    > "$ROOTFS/etc/profile.d/path.sh"
+
 # Clean package cache
 rm -rf "$ROOTFS/var/cache/apt/archives"/*.deb \
        "$ROOTFS/var/lib/apt/lists"/*
