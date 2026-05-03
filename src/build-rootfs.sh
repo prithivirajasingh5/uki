@@ -11,28 +11,74 @@ fi
 mkdir -p "$ROOTFS"
 
 PACKAGES=(
+    # Base shell + hardware inspection
     bash
     util-linux
     pciutils
     usbutils
     curl
+    dmidecode          # read BIOS/DMI tables — RAM slots, serial numbers, firmware version
+    lshw               # full hardware inventory tree
+
+    # Partitioning + filesystems
     parted
     gdisk
     btrfs-progs
     nvme-cli
+    e2fsprogs          # ext4: fsck.ext4, mkfs.ext4
+    dosfstools         # FAT/EFI: fsck.fat, mkfs.fat
+    xfsprogs           # XFS: xfs_repair, mkfs.xfs (default on RHEL/Fedora)
+    ntfs-3g            # NTFS read/write (Windows dual-boot, external drives)
+    exfatprogs         # exFAT (external drives, SD cards)
+    xz-utils           # decompress .xz/.tar.xz archives
+
+    # LVM + LUKS
+    lvm2               # LVM volume groups (default on many distro installs)
+    cryptsetup         # LUKS encrypted drives
+
+    # Disk health + data recovery
+    smartmontools      # smartctl — drive health, reallocated sectors, temperature
+    testdisk           # recover lost partitions and deleted files
+    gddrescue          # ddrescue — image a failing drive around bad sectors
+
+    # EFI boot management
+    efibootmgr         # manage/repair EFI boot entries
+    grub-efi-amd64-bin # GRUB tools for EFI boot repair/reinstall
+
+    # WiFi + networking
     iwd
     iproute2
+    isc-dhcp-client    # dhclient — DHCP on any interface
+    iputils-ping       # ping
+    traceroute
+    netcat-openbsd     # nc — test ports, pipe data
+    tcpdump            # packet capture
+    ethtool            # wired NIC diagnostics (speed, duplex, driver)
+    bind9-dnsutils     # nslookup, dig, host
+
+    # Remote access + file sync
     openssh-client
-    squashfs-tools   # provides unsquashfs inside the running rescue system
-    kmod             # provides modprobe/depmod for the rescue shell
-    dbus             # required by iwd — provides dbus.socket/dbus.service
-    systemd-sysv     # provides poweroff/reboot/halt/shutdown as systemctl symlinks
-    udev             # auto-loads kernel modules from pci/usb aliases on boot
-    iputils-ping     # ping
-    findutils        # find
-    isc-dhcp-client  # dhclient — request an IP via DHCP on any interface
-    nano             # nano text editor
-    procps           # ps, free
+    rsync              # pull data off a failing drive over SSH
+
+    # System services
+    squashfs-tools     # provides unsquashfs inside the running rescue system
+    kmod               # provides modprobe/depmod for the rescue shell
+    dbus               # required by iwd
+    systemd-sysv       # provides poweroff/reboot/halt/shutdown as systemctl symlinks
+    udev               # auto-loads kernel modules from pci/usb aliases on boot
+
+    # Process + debug
+    procps             # ps, free
+    htop               # interactive process viewer
+    lsof               # list open files and sockets
+    strace             # trace syscalls — diagnose silent failures
+
+    # Editors + file tools
+    nano
+    vim-tiny           # more capable editor for complex edits
+    less               # pager — essential for reading large files
+    file               # identify file types by magic bytes
+    findutils          # find
 )
 
 IFS=',' INCLUDE="${PACKAGES[*]}"
@@ -74,6 +120,16 @@ EnableNetworkConfiguration=true
 
 [Network]
 EnableIPv6=true
+EOF
+
+# debootstrap symlinks /etc/resolv.conf -> /run/systemd/resolve/stub-resolv.conf
+# (nameserver 127.0.0.53). systemd-resolved is not running in rescue so that stub
+# is a dead end — DNS lookups fail even though IP connectivity works fine.
+# Replace with a static file pointing at well-known public resolvers.
+rm -f "$ROOTFS/etc/resolv.conf"
+cat > "$ROOTFS/etc/resolv.conf" <<'EOF'
+nameserver 8.8.8.8
+nameserver 1.1.1.1
 EOF
 
 # Auto-login root on tty1 (physical console) and ttyS0 (QEMU serial).
