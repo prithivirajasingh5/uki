@@ -28,6 +28,11 @@ PACKAGES=(
     dbus             # required by iwd — provides dbus.socket/dbus.service
     systemd-sysv     # provides poweroff/reboot/halt/shutdown as systemctl symlinks
     udev             # auto-loads kernel modules from pci/usb aliases on boot
+    iputils-ping     # ping
+    findutils        # find
+    isc-dhcp-client  # dhclient — request an IP via DHCP on any interface
+    nano             # nano text editor
+    procps           # ps, free
 )
 
 IFS=',' INCLUDE="${PACKAGES[*]}"
