@@ -64,6 +64,18 @@ systemctl --root="$ROOTFS" mask nvmf-autoconnect.service
 # on boot and manages any wifi interface that udev hands it.
 systemctl --root="$ROOTFS" enable iwd
 
+# Tell iwd to run its own DHCP client and process IPv6 router advertisements
+# after association. Without this, iwd only handles layer 2 (WiFi association)
+# and the kernel only generates a link-local IPv6 address — no IPv4, no global IPv6.
+mkdir -p "$ROOTFS/etc/iwd"
+cat > "$ROOTFS/etc/iwd/main.conf" <<'EOF'
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+EnableIPv6=true
+EOF
+
 # Auto-login root on tty1 (physical console) and ttyS0 (QEMU serial).
 for tty in tty1 ttyS0; do
     dir="$ROOTFS/etc/systemd/system/getty@${tty}.service.d"
