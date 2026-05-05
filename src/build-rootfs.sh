@@ -181,6 +181,9 @@ if [ -d /lib/firmware ]; then
     rm -rf "$FW/cirrus"
 fi
 
+# readme command — type 'readme' at the rescue shell for a quick reference
+install -m 0755 src/rescue-readme "$ROOTFS/usr/local/bin/readme"
+
 # Clean package cache
 rm -rf "$ROOTFS/var/cache/apt/archives"/*.deb \
        "$ROOTFS/var/lib/apt/lists"/*
