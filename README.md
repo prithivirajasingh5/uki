@@ -47,6 +47,69 @@ Then select it from your UEFI firmware boot menu (usually F12 or F2 at POST).
 
 ---
 
+## Install on this machine (no USB needed)
+
+You can register `rescue.efi` as a permanent boot entry on the same laptop alongside
+your existing OS. It will appear in your UEFI firmware boot menu.
+
+### 1. Check EFI partition space
+
+The EFI partition should have at least 1 GB of total capacity and enough free space
+for `rescue.efi` (~300–500 MB). Check both:
+
+```bash
+# Total size and free space
+df -h /boot/efi
+
+# Partition size on disk
+lsblk -o NAME,SIZE,MOUNTPOINT | grep /boot/efi
+```
+
+If free space is tight, use the USB method instead — resizing the EFI partition
+while the OS is running is risky.
+
+### 2. Find your EFI disk and partition number
+
+`efibootmgr` needs the raw disk device and the partition number separately:
+
+```bash
+findmnt -n -o SOURCE /boot/efi
+# e.g.  /dev/sda1      → disk=/dev/sda,      part=1
+#        /dev/nvme0n1p1 → disk=/dev/nvme0n1,  part=1
+#        /dev/nvme0n1p2 → disk=/dev/nvme0n1,  part=2
+```
+
+### 3. Create the directory, copy the file, register the boot entry
+
+```bash
+sudo mkdir -p /boot/efi/EFI/rescue
+sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
+
+# Replace /dev/sda and 1 with your disk and partition number from step 2
+sudo efibootmgr --create --disk /dev/sda --part 1 \
+    --label "Rescue EFI" --loader '\EFI\rescue\rescue.efi'
+```
+
+### 4. Verify
+
+```bash
+efibootmgr -v | grep -i rescue
+# Should print something like:
+# Boot0003* Rescue EFI  HD(1,GPT,...)/File(\EFI\rescue\rescue.efi)
+```
+
+Reboot and select **Rescue EFI** from the firmware boot menu (usually F12 or F2 at POST).
+
+### Updating rescue.efi later
+
+Only the copy step is needed — the NVRAM entry persists across updates:
+
+```bash
+sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
+```
+
+---
+
 ## What's inside
 
 | Category | Tools |
