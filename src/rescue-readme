@@ -1,5 +1,5 @@
 #!/bin/sh
-cat <<'EOF'
+less <<'EOF'
 ════════════════════════════════════════════════════════════════
   RESCUE EFI — Quick Reference
 ════════════════════════════════════════════════════════════════
@@ -8,19 +8,6 @@ WHAT THIS IS
   Single EFI binary that boots entirely from RAM.
   Kernel + rootfs are embedded — no disk needed to boot.
   Built with: make all   from github.com/prithivirajasingh5/uki
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  WIFI (iwd — no wpa_supplicant needed)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  iwctl
-    device list
-    station wlan0 scan
-    station wlan0 get-networks
-    station wlan0 connect "SSID"
-    quit
-
-  Verify:   ip addr show wlan0
-  DNS:      /etc/resolv.conf already points at 8.8.8.8 / 1.1.1.1
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   DISK TOOLS
@@ -95,5 +82,20 @@ WHAT THIS IS
   Reboot:   reboot
   Poweroff: poweroff
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  WIFI (iwd — no wpa_supplicant needed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  iwctl
+    device list
+    station wlan0 scan
+    station wlan0 get-networks
+    station wlan0 connect "SSID"
+    quit
+
+  Verify:   ip addr show wlan0
+  DNS:      /etc/resolv.conf already points at 8.8.8.8 / 1.1.1.1
+  Example: iwctl station wlan0 connect pi
+
 ════════════════════════════════════════════════════════════════
+
 EOF
