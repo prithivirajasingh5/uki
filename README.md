@@ -30,10 +30,15 @@ sticks already have one; you can also create one with `parted` + `mkfs.fat`.
 
 ```bash
 # Find the ESP mount point, e.g. /media/you/EFI
-cp rescue.efi /media/you/EFI/EFI/BOOT/BOOTX64.EFI
+mkdir -p /media/you/EFI/EFI/BOOT
+cp ~/rescue-efi/rescue.efi /media/you/EFI/EFI/BOOT/BOOTX64.EFI
 
-# Or copy to an existing ESP already mounted at /boot/efi:
-sudo cp rescue.efi /boot/efi/EFI/rescue/rescue.efi
+# Or install alongside an existing ESP already mounted at /boot/efi:
+sudo mkdir -p /boot/efi/EFI/rescue
+sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
+
+# Register a boot entry (adjust --disk and --part to match your EFI partition):
+#   lsblk -o NAME,PARTTYPE to find the right disk and partition number
 sudo efibootmgr --create --disk /dev/sda --part 1 \
     --label "Rescue EFI" --loader '\EFI\rescue\rescue.efi'
 ```
@@ -76,9 +81,9 @@ Intermediate steps if you want finer control:
 ```bash
 sudo make deps       # check and install host build dependencies
 sudo make rootfs     # debootstrap Debian into work/rootfs/  (~10 min)
-     make squashfs   # compress to work/root.squashfs        (~1 min)
-     make initramfs  # pack cpio.gz with init + squashfs     (~5 s)
-     make uki        # ukify → rescue.efi                    (~5 s)
+sudo make squashfs   # compress to work/root.squashfs        (~1 min)
+sudo make initramfs  # pack cpio.gz with init + squashfs     (~5 s)
+sudo make uki        # ukify → rescue.efi                    (~5 s)
 ```
 
 Each step is incremental — make only reruns a step if its inputs are newer than its output.
@@ -159,7 +164,7 @@ image, and enroll it via MOK without disabling Secure Boot.
 cd ~/rescue-efi
 sudo make all          # rebuild everything
 sudo make uki          # rebuild only the EFI (if rootfs/squashfs unchanged)
-make clean             # remove all build artifacts
+sudo make clean        # remove all build artifacts (work/ is owned by root)
 ```
 
 ---
