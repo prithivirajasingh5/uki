@@ -83,7 +83,7 @@ your existing OS. It will appear in your UEFI firmware boot menu.
 ### 1. Check EFI partition space
 
 The EFI partition should have at least 1 GB of total capacity and enough free space
-for `rescue.efi` (~300–500 MB). Check both:
+for `rescue.efi` (~700 MB). Check both:
 
 ```bash
 # Total size and free space
