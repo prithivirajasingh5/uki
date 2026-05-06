@@ -23,31 +23,7 @@ Output: `~/rescue-efi/rescue.efi`
 
 ---
 
-## Put it on a USB stick
-
-You need a USB drive with a FAT32 EFI System Partition (ESP). Most existing bootable USB
-sticks already have one; you can also create one with `parted` + `mkfs.fat`.
-
-```bash
-# Find the ESP mount point, e.g. /media/you/EFI
-mkdir -p /media/you/EFI/EFI/BOOT
-cp ~/rescue-efi/rescue.efi /media/you/EFI/EFI/BOOT/BOOTX64.EFI
-
-# Or install alongside an existing ESP already mounted at /boot/efi:
-sudo mkdir -p /boot/efi/EFI/rescue
-sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
-
-# Register a boot entry (adjust --disk and --part to match your EFI partition):
-#   lsblk -o NAME,PARTTYPE to find the right disk and partition number
-sudo efibootmgr --create --disk /dev/sda --part 1 \
-    --label "Rescue EFI" --loader '\EFI\rescue\rescue.efi'
-```
-
-Then select it from your UEFI firmware boot menu (usually F12 or F2 at POST).
-
----
-
-## Install on this machine (no USB needed)
+## Install on this machine
 
 You can register `rescue.efi` as a permanent boot entry on the same laptop alongside
 your existing OS. It will appear in your UEFI firmware boot menu.
@@ -65,8 +41,8 @@ df -h /boot/efi
 lsblk -o NAME,SIZE,MOUNTPOINT | grep /boot/efi
 ```
 
-If free space is tight, use the USB method instead — resizing the EFI partition
-while the OS is running is risky.
+If free space is tight, resizing the EFI partition while the OS is running is risky —
+consider a dedicated rescue laptop or a larger EFI partition.
 
 ### 2. Find your EFI disk and partition number
 
