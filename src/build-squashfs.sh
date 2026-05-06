@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-ROOTFS=work/rootfs
-SQUASHFS=work/root.squashfs
+ROOTFS="${ROOTFS:-work/full/rootfs}"
+SQUASHFS="${SQUASHFS:-work/full/root.squashfs}"
 
 if [ ! -f "$ROOTFS/.done" ]; then
     echo "error: rootfs not built — run 'make rootfs' first" >&2

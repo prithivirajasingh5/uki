@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-SQUASHFS=work/root.squashfs
-IDIR=work/initramfs
-INITRAMFS=work/initramfs.cpio.gz
+SQUASHFS="${SQUASHFS:-work/full/root.squashfs}"
+IDIR="${IDIR:-work/full/initramfs-stage}"
+INITRAMFS="${INITRAMFS:-work/full/initramfs.cpio.gz}"
 
 if [ ! -f "$SQUASHFS" ]; then
     echo "error: $SQUASHFS not found — run 'make squashfs' first" >&2

@@ -9,33 +9,63 @@ required at boot time. The kernel, rootfs, and all tools are packed into one fil
 
 ## Get rescue.efi
 
+Two variants are available:
+
+| | `rescue-full.efi` | `rescue-mini.efi` |
+|---|---|---|
+| EFI size | ~700 MB | ~150 MB |
+| RAM needed | ~2 GB | ~500 MB |
+| Disk / partition / format | ✓ | ✓ |
+| EFI boot repair (efibootmgr, grub) | ✓ | ✓ |
+| File editor (nano) | ✓ | ✓ |
+| Chroot into installed system | ✓ | ✓ |
+| LVM / LUKS | ✓ | — |
+| Data recovery (ddrescue, testdisk) | ✓ | — |
+| WiFi (iwd) | ✓ | — |
+| SSH / rsync | ✓ | — |
+| Network tools | ✓ | — |
+| Hardware info (lshw, dmidecode) | ✓ | — |
+
+**Choose mini** if you just need to partition disks, fix grub, or edit a config file — and your EFI partition is small.
+**Choose full** if you need WiFi, SSH, data recovery, LVM, or LUKS.
+
 **Option A — Download pre-built** (fastest):
 
 ```bash
 mkdir -p ~/rescue-efi
-wget -O ~/rescue-efi/rescue.efi \
-    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue.efi
+
+# full (~700 MB)
+wget -O ~/rescue-efi/rescue-full.efi \
+    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-full.efi
+
+# mini (~150 MB)
+wget -O ~/rescue-efi/rescue-mini.efi \
+    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-mini.efi
 ```
 
-Or grab it from the [releases page](https://github.com/prithivirajasingh5/uki/releases/latest).
+Or grab them from the [releases page](https://github.com/prithivirajasingh5/uki/releases/latest).
 
-**Option B — Build from source** (~15 min, Debian/Ubuntu x86_64):
+**Option B — Build from source** (Debian/Ubuntu x86_64):
 
 ```bash
+# full (~15 min)
 curl -fsSL https://raw.githubusercontent.com/prithivirajasingh5/uki/master/install.sh | bash
+
+# mini (~5 min)
+curl -fsSL https://raw.githubusercontent.com/prithivirajasingh5/uki/master/install.sh | VARIANT=mini bash
 ```
 
 The script clones this repo, installs any missing build dependencies, and runs `make all`.
 It will prompt for your sudo password when the build starts.
 
-Both options produce `~/rescue-efi/rescue.efi`.
+Output: `~/rescue-efi/rescue-full.efi` or `~/rescue-efi/rescue-mini.efi`
 
 ---
 
 ## Sign for Secure Boot
 
 Most modern machines have Secure Boot enabled and will refuse to boot an unsigned EFI binary.
-Sign `rescue.efi` before installing. Check whether Secure Boot is active:
+Sign your chosen variant before installing. Check whether Secure Boot is active:
 
 ```bash
 mokutil --sb-state
@@ -55,12 +85,12 @@ openssl req -newkey rsa:2048 -nodes -keyout ~/rescue-keys/rescue.key \
     -out ~/rescue-keys/rescue.crt
 openssl x509 -in ~/rescue-keys/rescue.crt -outform DER -out ~/rescue-keys/rescue.cer
 
-# Sign the image in-place
+# Sign the image in-place (replace rescue-full.efi with rescue-mini.efi if using mini)
 sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
-       --output ~/rescue-efi/rescue.efi ~/rescue-efi/rescue.efi
+       --output ~/rescue-efi/rescue-full.efi ~/rescue-efi/rescue-full.efi
 
 # Verify
-sbverify --cert ~/rescue-keys/rescue.crt ~/rescue-efi/rescue.efi && echo "signature OK"
+sbverify --cert ~/rescue-keys/rescue.crt ~/rescue-efi/rescue-full.efi && echo "signature OK"
 
 # Enroll your key via MOK — enter a one-time password when prompted
 sudo mokutil --import ~/rescue-keys/rescue.cer
@@ -111,7 +141,9 @@ findmnt -n -o SOURCE /boot/efi
 
 ```bash
 sudo mkdir -p /boot/efi/EFI/rescue
-sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
+
+# Copy your chosen variant (adjust filename if using mini)
+sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
 
 # Replace /dev/sda and 1 with your disk and partition number from step 2
 sudo efibootmgr --create --disk /dev/sda --part 1 \
@@ -134,8 +166,8 @@ Re-sign first (if Secure Boot is enabled), then copy — the NVRAM entry persist
 
 ```bash
 sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
-       --output ~/rescue-efi/rescue.efi ~/rescue-efi/rescue.efi
-sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
+       --output ~/rescue-efi/rescue-full.efi ~/rescue-efi/rescue-full.efi
+sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
 ```
 
 ---
@@ -166,17 +198,18 @@ Type `readme` at the rescue shell for a quick reference card.
 ```bash
 git clone https://github.com/prithivirajasingh5/uki.git
 cd uki
-sudo make all
+sudo make full    # builds rescue-full.efi
+sudo make mini    # builds rescue-mini.efi
 ```
 
 Intermediate steps if you want finer control:
 
 ```bash
-sudo make deps       # check and install host build dependencies
-sudo make rootfs     # debootstrap Debian into work/rootfs/  (~10 min)
-sudo make squashfs   # compress to work/root.squashfs        (~1 min)
-sudo make initramfs  # pack cpio.gz with init + squashfs     (~5 s)
-sudo make uki        # ukify → rescue.efi                    (~5 s)
+sudo make deps                  # check and install host build dependencies
+sudo make rootfs VARIANT=mini   # debootstrap Debian into work/mini/rootfs/  (~5 min)
+sudo make squashfs VARIANT=mini # compress to work/mini/root.squashfs         (~30 s)
+sudo make initramfs VARIANT=mini
+sudo make uki VARIANT=mini      # ukify → rescue-mini.efi
 ```
 
 Each step is incremental — make only reruns a step if its inputs are newer than its output.
@@ -187,7 +220,7 @@ By default the build uses the latest kernel on the build host (`/boot/vmlinuz-*`
 To target a specific version:
 
 ```bash
-sudo make all KERNEL=/boot/vmlinuz-6.8.0-51-generic
+sudo make full KERNEL=/boot/vmlinuz-6.8.0-51-generic
 ```
 
 ---
@@ -195,8 +228,8 @@ sudo make all KERNEL=/boot/vmlinuz-6.8.0-51-generic
 ## Requirements
 
 - Debian or Ubuntu, x86_64 (build host)
-- ~2 GB free disk space for the build tree
-- ~2 GB RAM on the rescue target (the rootfs — including kernel modules and firmware — extracts into tmpfs)
+- Disk space: ~2 GB for full, ~500 MB for mini
+- RAM on rescue target: ~2 GB for full, ~500 MB for mini
 - UEFI firmware on the rescue target (BIOS/MBR is not supported)
 
 The `make deps` step installs these build-time packages automatically:
@@ -247,9 +280,10 @@ See [`docs/wifi-setup.md`](docs/wifi-setup.md) for hidden networks, static IP, a
 
 ```bash
 cd ~/rescue-efi
-sudo make all          # rebuild everything
-sudo make uki          # rebuild only the EFI (if rootfs/squashfs unchanged)
-sudo make clean        # remove all build artifacts (work/ is owned by root)
+sudo make full                      # rebuild full
+sudo make mini                      # rebuild mini
+sudo make uki VARIANT=full          # rebuild only the EFI (rootfs/squashfs unchanged)
+sudo make clean                     # remove all build artifacts
 ```
 
 ---

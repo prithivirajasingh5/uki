@@ -1,19 +1,26 @@
+VARIANT   ?= full
 KERNEL    ?= $(shell ls /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
-WORK      := work
+WORK      := work/$(VARIANT)
 ROOTFS    := $(WORK)/rootfs
 SQUASHFS  := $(WORK)/root.squashfs
+IDIR      := $(WORK)/initramfs-stage
 INITRAMFS := $(WORK)/initramfs.cpio.gz
-OUTPUT    := rescue.efi
+OUTPUT    := rescue-$(VARIANT).efi
 
 # Packages that must be present on the build host
 HOST_PKGS := debootstrap squashfs-tools systemd-ukify busybox-static
 
-.PHONY: all deps rootfs squashfs initramfs uki run clean test
+.PHONY: all deps full mini rootfs squashfs initramfs uki run clean test
 
 all: deps uki
 
+full:
+	$(MAKE) VARIANT=full
+
+mini:
+	$(MAKE) VARIANT=mini
+
 # Check for required host packages and install any that are missing.
-# Runs as part of `make all`; can also be invoked standalone with `sudo make deps`.
 deps:
 	@missing=""; \
 	for pkg in $(HOST_PKGS); do \
@@ -28,26 +35,26 @@ deps:
 
 rootfs: $(ROOTFS)/.done
 $(ROOTFS)/.done:
-	bash src/build-rootfs.sh
+	ROOTFS=$(ROOTFS) VARIANT=$(VARIANT) bash src/build-rootfs.sh
 	touch $@
 
 squashfs: $(SQUASHFS)
 $(SQUASHFS): $(ROOTFS)/.done
-	bash src/build-squashfs.sh
+	ROOTFS=$(ROOTFS) SQUASHFS=$(SQUASHFS) bash src/build-squashfs.sh
 
 initramfs: $(INITRAMFS)
 $(INITRAMFS): $(SQUASHFS)
-	bash src/build-initramfs.sh
+	SQUASHFS=$(SQUASHFS) IDIR=$(IDIR) INITRAMFS=$(INITRAMFS) bash src/build-initramfs.sh
 
 uki: $(OUTPUT)
 $(OUTPUT): $(INITRAMFS)
-	KERNEL=$(KERNEL) bash src/build-uki.sh
+	KERNEL=$(KERNEL) INITRAMFS=$(INITRAMFS) OUTPUT=$(OUTPUT) bash src/build-uki.sh
 
 run: $(OUTPUT)
-	bash src/run-qemu.sh
+	OUTPUT=$(OUTPUT) EFI_IMG=$(WORK)/efi.img bash src/run-qemu.sh
 
 clean:
-	rm -rf $(WORK) $(OUTPUT)
+	rm -rf work rescue-full.efi rescue-mini.efi
 
 test:
 	bash tests/shellcheck.sh

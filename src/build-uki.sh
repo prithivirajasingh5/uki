@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-INITRAMFS=work/initramfs.cpio.gz
-OUTPUT=rescue.efi
+INITRAMFS="${INITRAMFS:-work/full/initramfs.cpio.gz}"
+OUTPUT="${OUTPUT:-rescue-full.efi}"
 CMDLINE="console=ttyS0,115200 console=tty0"
 
 if [ -z "${KERNEL:-}" ]; then

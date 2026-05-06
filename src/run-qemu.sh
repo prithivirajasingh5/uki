@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-OUTPUT=rescue.efi
-EFI_IMG=work/efi.img
+OUTPUT="${OUTPUT:-rescue-full.efi}"
+EFI_IMG="${EFI_IMG:-work/full/efi.img}"
 OVMF_CODE=/usr/share/OVMF/OVMF_CODE_4M.fd
 OVMF_VARS_TEMPLATE=/usr/share/OVMF/OVMF_VARS_4M.fd
 OVMF_VARS=/tmp/uki-ovmf-vars.fd
