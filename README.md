@@ -35,7 +35,13 @@ Both options produce `~/rescue-efi/rescue.efi`.
 ## Sign for Secure Boot
 
 Most modern machines have Secure Boot enabled and will refuse to boot an unsigned EFI binary.
-Sign `rescue.efi` before installing. If Secure Boot is disabled on your machine, skip this section.
+Sign `rescue.efi` before installing. Check whether Secure Boot is active:
+
+```bash
+mokutil --sb-state
+# "SecureBoot enabled"  → follow all steps below
+# "SecureBoot disabled" → skip this section
+```
 
 ```bash
 # Install signing tools (one-time)
