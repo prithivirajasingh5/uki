@@ -51,8 +51,8 @@ separate partition. This means:
 - zstd compression keeps the image small (~66 MB for a full Debian environment)
 
 The trade-off: the full rootfs is extracted into tmpfs on every boot. On a machine
-with 4 GB RAM this uses ~180 MB. On machines with less than ~512 MB RAM this may
-be tight.
+with 4 GB RAM this uses ~180 MB. On machines with less than ~2 GB RAM this may
+be tight, especially once kernel modules and firmware blobs are included.
 
 ## Why tmpfs (not a squashfs loop mount)
 

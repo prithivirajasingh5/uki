@@ -98,7 +98,7 @@ sudo make all KERNEL=/boot/vmlinuz-6.8.0-51-generic
 
 - Debian or Ubuntu, x86_64 (build host)
 - ~2 GB free disk space for the build tree
-- ~512 MB RAM on the rescue target (more is better; the rootfs extracts into tmpfs)
+- ~2 GB RAM on the rescue target (the rootfs — including kernel modules and firmware — extracts into tmpfs)
 - UEFI firmware on the rescue target (BIOS/MBR is not supported)
 
 The `make deps` step installs these build-time packages automatically:
