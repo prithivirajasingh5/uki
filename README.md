@@ -7,19 +7,65 @@ required at boot time. The kernel, rootfs, and all tools are packed into one fil
 
 ---
 
-## Quick install
+## Get rescue.efi
 
-Builds `rescue.efi` on your machine (~15 min on first run). Requires Debian or Ubuntu, x86_64.
+**Option A — Download pre-built** (fastest):
+
+```bash
+mkdir -p ~/rescue-efi
+wget -O ~/rescue-efi/rescue.efi \
+    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue.efi
+```
+
+Or grab it from the [releases page](https://github.com/prithivirajasingh5/uki/releases/latest).
+
+**Option B — Build from source** (~15 min, Debian/Ubuntu x86_64):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/prithivirajasingh5/uki/master/install.sh | bash
 ```
 
 The script clones this repo, installs any missing build dependencies, and runs `make all`.
-It will prompt for your sudo password when the build starts (debootstrap and kernel module
-copy need root).
+It will prompt for your sudo password when the build starts.
 
-Output: `~/rescue-efi/rescue.efi`
+Both options produce `~/rescue-efi/rescue.efi`.
+
+---
+
+## Sign for Secure Boot
+
+Most modern machines have Secure Boot enabled and will refuse to boot an unsigned EFI binary.
+Sign `rescue.efi` before installing. If Secure Boot is disabled on your machine, skip this section.
+
+```bash
+# Install signing tools (one-time)
+sudo apt install sbsigntool openssl mokutil
+
+# Generate a private key and certificate (one-time — keep rescue.key safe, never share it)
+mkdir -p ~/rescue-keys
+openssl req -newkey rsa:2048 -nodes -keyout ~/rescue-keys/rescue.key \
+    -new -x509 -sha256 -days 3650 \
+    -subj "/CN=Rescue EFI Signing Key/" \
+    -out ~/rescue-keys/rescue.crt
+openssl x509 -in ~/rescue-keys/rescue.crt -outform DER -out ~/rescue-keys/rescue.cer
+
+# Sign the image in-place
+sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
+       --output ~/rescue-efi/rescue.efi ~/rescue-efi/rescue.efi
+
+# Verify
+sbverify --cert ~/rescue-keys/rescue.crt ~/rescue-efi/rescue.efi && echo "signature OK"
+
+# Enroll your key via MOK — enter a one-time password when prompted
+sudo mokutil --import ~/rescue-keys/rescue.cer
+```
+
+Now reboot. **MokManager** will appear on the next boot — enter the password you just set,
+select **Enroll MOK**, and reboot again. Your key is now trusted by the firmware.
+
+After enrollment, `rescue.efi` will boot with Secure Boot active. See
+[`docs/secure-boot-signing.md`](docs/secure-boot-signing.md) for advanced options
+(signing at build time, YubiKey, verifying enrollment).
 
 ---
 
@@ -78,9 +124,11 @@ Reboot and select **Rescue EFI** from the firmware boot menu (usually F12 or F2 
 
 ### Updating rescue.efi later
 
-Only the copy step is needed — the NVRAM entry persists across updates:
+Re-sign first (if Secure Boot is enabled), then copy — the NVRAM entry persists:
 
 ```bash
+sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
+       --output ~/rescue-efi/rescue.efi ~/rescue-efi/rescue.efi
 sudo cp ~/rescue-efi/rescue.efi /boot/efi/EFI/rescue/rescue.efi
 ```
 
@@ -186,14 +234,6 @@ ip addr show wlan0   # verify IP (iwd handles DHCP automatically)
 ```
 
 See [`docs/wifi-setup.md`](docs/wifi-setup.md) for hidden networks, static IP, and SSH.
-
----
-
-## Secure Boot
-
-`rescue.efi` is unsigned by default and will be rejected by firmware with Secure Boot enabled.
-See [`docs/secure-boot-signing.md`](docs/secure-boot-signing.md) to generate a key, sign the
-image, and enroll it via MOK without disabling Secure Boot.
 
 ---
 
