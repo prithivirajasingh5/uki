@@ -5,8 +5,6 @@ A single self-contained EFI binary that boots a full Debian rescue environment e
 Drop `rescue.efi` onto any UEFI machine — no installer, no USB formatting tool, no network
 required at boot time. The kernel, rootfs, and all tools are packed into one file.
 
-![rescue shell](uki-1.jpeg)
-
 ---
 
 ## Quick install
@@ -83,7 +81,7 @@ sudo make rootfs     # debootstrap Debian into work/rootfs/  (~10 min)
      make uki        # ukify → rescue.efi                    (~5 s)
 ```
 
-Each step is idempotent — make only reruns a step if its inputs are newer than its output.
+Each step is incremental — make only reruns a step if its inputs are newer than its output.
 
 ### Targeting a specific kernel
 
@@ -118,7 +116,7 @@ rescue.efi  (PE/EFI binary — one file)
   │    ├── busybox        static binary: sh, mount, switch_root …
   │    ├── unsquashfs     extracts the rootfs
   │    └── root.squashfs  compressed Debian rootfs (~200 MB uncompressed)
-  └── .cmdline → console=ttyS0,115200 console=tty0 quiet
+  └── .cmdline → console=ttyS0,115200 console=tty0
 ```
 
 On boot:

@@ -3,7 +3,7 @@ set -euo pipefail
 
 INITRAMFS=work/initramfs.cpio.gz
 OUTPUT=rescue.efi
-CMDLINE="console=ttyS0,115200 console=tty0 quiet"
+CMDLINE="console=ttyS0,115200 console=tty0"
 
 if [ -z "${KERNEL:-}" ]; then
     KERNEL=$(find /boot -maxdepth 1 -name 'vmlinuz-*' 2>/dev/null | sort -V | tail -1)
