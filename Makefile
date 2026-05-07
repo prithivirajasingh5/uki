@@ -12,13 +12,15 @@ HOST_PKGS := debootstrap squashfs-tools systemd-ukify busybox-static
 
 .PHONY: all deps full mini rootfs squashfs initramfs uki run clean test
 
-all: deps uki
+all: deps
+	$(MAKE) VARIANT=full uki
+	$(MAKE) VARIANT=mini uki
 
 full:
-	$(MAKE) VARIANT=full
+	$(MAKE) VARIANT=full deps uki
 
 mini:
-	$(MAKE) VARIANT=mini
+	$(MAKE) VARIANT=mini deps uki
 
 # Check for required host packages and install any that are missing.
 deps:
