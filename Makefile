@@ -1,4 +1,4 @@
-VARIANT   ?= full
+VARIANT   ?= mini
 KERNEL    ?= $(shell ls /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
 WORK      := work/$(VARIANT)
 ROOTFS    := $(WORK)/rootfs

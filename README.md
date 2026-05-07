@@ -38,13 +38,13 @@ Two variants are available:
 ```bash
 mkdir -p ~/rescue-efi
 
-# full (~700 MB)
-wget -O ~/rescue-efi/rescue-full.efi \
-    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-full.efi
-
-# mini (~150 MB)
+# mini (~150 MB) — fits on most EFI partitions; disk/partition/EFI repair
 wget -O ~/rescue-efi/rescue-mini.efi \
     https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-mini.efi
+
+# full (~700 MB) — adds WiFi, SSH, data recovery, LVM, LUKS
+wget -O ~/rescue-efi/rescue-full.efi \
+    https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-full.efi
 ```
 
 Or grab them from the [releases page](https://github.com/prithivirajasingh5/uki/releases/latest).
@@ -86,12 +86,12 @@ openssl req -newkey rsa:2048 -nodes -keyout ~/rescue-keys/rescue.key \
     -out ~/rescue-keys/rescue.crt
 openssl x509 -in ~/rescue-keys/rescue.crt -outform DER -out ~/rescue-keys/rescue.cer
 
-# Sign the image in-place (replace rescue-full.efi with rescue-mini.efi if using mini)
+# Sign the image in-place (replace rescue-mini.efi with rescue-full.efi if using full)
 sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
-       --output ~/rescue-efi/rescue-full.efi ~/rescue-efi/rescue-full.efi
+       --output ~/rescue-efi/rescue-mini.efi ~/rescue-efi/rescue-mini.efi
 
 # Verify
-sbverify --cert ~/rescue-keys/rescue.crt ~/rescue-efi/rescue-full.efi && echo "signature OK"
+sbverify --cert ~/rescue-keys/rescue.crt ~/rescue-efi/rescue-mini.efi && echo "signature OK"
 
 # Enroll your key via MOK — enter a one-time password when prompted
 sudo mokutil --import ~/rescue-keys/rescue.cer
@@ -113,8 +113,8 @@ your existing OS. It will appear in your UEFI firmware boot menu.
 
 ### 1. Check EFI partition space
 
-The EFI partition should have at least 1 GB of total capacity and enough free space
-for `rescue.efi` (~700 MB). Check both:
+The EFI partition needs at least ~150 MB free for `rescue-mini.efi` (~700 MB for full).
+Check both:
 
 ```bash
 # Total size and free space
@@ -143,8 +143,8 @@ findmnt -n -o SOURCE /boot/efi
 ```bash
 sudo mkdir -p /boot/efi/EFI/rescue
 
-# Copy your chosen variant (adjust filename if using mini)
-sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
+# Copy rescue-mini.efi (use rescue-full.efi if you need WiFi, SSH, LVM, etc.)
+sudo cp ~/rescue-efi/rescue-mini.efi /boot/efi/EFI/rescue/rescue.efi
 
 # Replace /dev/sda and 1 with your disk and partition number from step 2
 sudo efibootmgr --create --disk /dev/sda --part 1 \
@@ -167,8 +167,8 @@ Re-sign first (if Secure Boot is enabled), then copy — the NVRAM entry persist
 
 ```bash
 sbsign --key ~/rescue-keys/rescue.key --cert ~/rescue-keys/rescue.crt \
-       --output ~/rescue-efi/rescue-full.efi ~/rescue-efi/rescue-full.efi
-sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
+       --output ~/rescue-efi/rescue-mini.efi ~/rescue-efi/rescue-mini.efi
+sudo cp ~/rescue-efi/rescue-mini.efi /boot/efi/EFI/rescue/rescue.efi
 ```
 
 ---
@@ -382,7 +382,8 @@ By default the build uses the latest kernel on the build host (`/boot/vmlinuz-*`
 To target a specific version:
 
 ```bash
-sudo make full KERNEL=/boot/vmlinuz-6.8.0-51-generic
+sudo make mini KERNEL=/boot/vmlinuz-6.8.0-51-generic
+sudo make full KERNEL=/boot/vmlinuz-6.8.0-51-generic  # or full
 ```
 
 ---
@@ -445,7 +446,7 @@ cd ~/rescue-efi
 sudo make all                       # rebuild both variants
 sudo make full                      # rebuild full only
 sudo make mini                      # rebuild mini only
-sudo make uki VARIANT=full          # rebuild only the EFI (rootfs/squashfs unchanged)
+sudo make uki VARIANT=mini          # rebuild only the EFI (rootfs/squashfs unchanged)
 sudo make clean && sudo make all    # full clean rebuild of both variants
 ```
 

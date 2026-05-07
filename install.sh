@@ -6,7 +6,7 @@ set -euo pipefail
 
 REPO="https://github.com/prithivirajasingh5/uki.git"
 RESCUE_DIR="${RESCUE_DIR:-$HOME/rescue-efi}"
-VARIANT="${VARIANT:-full}"
+VARIANT="${VARIANT:-mini}"
 
 print_banner() {
     echo ""
@@ -52,7 +52,7 @@ fetch_repo() {
 # ── build ────────────────────────────────────────────────────────────────────
 build() {
     echo ""
-    echo "==> Building rescue-$VARIANT.efi (this takes ~15 minutes on first run for full, ~5 min for mini)."
+    echo "==> Building rescue-$VARIANT.efi (this takes ~5 min for mini, ~15 min for full)."
     echo "    Root access is required for debootstrap and kernel module copy."
     echo ""
     sudo make -C "$RESCUE_DIR" VARIANT="$VARIANT" all
