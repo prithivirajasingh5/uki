@@ -7,6 +7,17 @@ your existing OS — no USB drive needed at rescue time.
 **Pick your path:**
 - [I'm on Linux — 4 steps](#install-on-linux)
 - [I'm on Windows — 6 steps](#install-on-windows)
+- [I'm on a Mac](#not-supported-on-mac) — read this first
+
+> **Mac users:** This project does not support Macs.
+> - **Apple Silicon (M1/M2/M3/M4):** the binary is x86_64 — it will not run on ARM, and
+>   Apple Silicon does not use standard UEFI.
+> - **Intel Mac:** Apple's EFI is non-standard. `efibootmgr` and `mokutil` do not work,
+>   WiFi drivers are missing, and T2 Macs require Apple Recovery to change boot security.
+>
+> There is no supported path for Macs. If you need a Mac rescue environment, use
+> [macOS Recovery](https://support.apple.com/en-us/102529) or a macOS-compatible Linux
+> live USB.
 
 ---
 
