@@ -1,34 +1,34 @@
 #!/bin/sh
 less <<'EOF'
-════════════════════════════════════════════════════════════════
-  RESCUE EFI MINI — Quick Reference
-════════════════════════════════════════════════════════════════
+================================================================
+  RESCUE EFI MINI -- Quick Reference
+================================================================
 
 WHAT THIS IS
   Minimal rescue: disk tools, filesystem repair, EFI boot management.
-  Kernel + rootfs are embedded — no disk needed to boot.
+  Kernel + rootfs are embedded -- no disk needed to boot.
   Built with: make mini   from github.com/prithivirajasingh5/uki
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   DISK INSPECTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   lsblk -f              list disks and partitions with filesystems
   blkid                 show UUIDs and filesystem types
   fdisk -l              list partition tables
   nvme list             list NVMe drives
   nvme smart-log /dev/nvme0   NVMe health info
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   PARTITIONING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   parted /dev/nvme0n1 print
   parted /dev/nvme0n1 mklabel gpt
   parted /dev/nvme0n1 mkpart primary ext4 1MiB 50GiB
   gdisk /dev/nvme0n1        interactive GPT editor
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   FILESYSTEMS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   mkfs.ext4 /dev/nvme0n1p2
   mkfs.fat -F32 /dev/nvme0n1p1     (EFI partition)
   mkfs.btrfs /dev/nvme0n1p2
@@ -36,9 +36,9 @@ WHAT THIS IS
   mount /dev/nvme0n1p2 /mnt
   umount /mnt
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   EFI BOOT MANAGEMENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   efibootmgr -v                        list all boot entries
   efibootmgr --delete-bootnum --bootnum 0003
   efibootmgr --create --disk /dev/nvme0n1 --part 1 \
@@ -55,20 +55,20 @@ WHAT THIS IS
     update-grub
     exit
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   FILES + EDITING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   nano /mnt/boot/grub/grub.cfg
   nano /mnt/etc/fstab
   find /mnt -name "grub.cfg"
   less /mnt/var/log/syslog
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   Reboot:   reboot
   Poweroff: poweroff
 
-════════════════════════════════════════════════════════════════
+================================================================
 
 EOF

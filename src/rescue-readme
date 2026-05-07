@@ -1,17 +1,17 @@
 #!/bin/sh
 less <<'EOF'
-════════════════════════════════════════════════════════════════
-  RESCUE EFI — Quick Reference
-════════════════════════════════════════════════════════════════
+================================================================
+  RESCUE EFI -- Quick Reference
+================================================================
 
 WHAT THIS IS
   Single EFI binary that boots entirely from RAM.
-  Kernel + rootfs are embedded — no disk needed to boot.
+  Kernel + rootfs are embedded -- no disk needed to boot.
   Built with: make all   from github.com/prithivirajasingh5/uki
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   DISK TOOLS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   lsblk -f                  show disks + filesystems
   fdisk -l                  list partitions
   parted /dev/nvme0n1       interactive partitioning (GPT)
@@ -28,9 +28,9 @@ WHAT THIS IS
     mount /dev/nvme0n1p2 /mnt/disk
     mount /dev/nvme0n1p1 /mnt/disk/boot/efi
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   LVM + LUKS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   LVM:
     vgscan && vgchange -ay      activate all volume groups
     lvs                         list logical volumes
@@ -39,9 +39,9 @@ WHAT THIS IS
     cryptsetup open /dev/sdX1 cryptroot
     mount /dev/mapper/cryptroot /mnt/disk
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   DATA RECOVERY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   Drive health:
     smartctl -a /dev/nvme0n1
     nvme smart-log /dev/nvme0n1
@@ -52,9 +52,9 @@ WHAT THIS IS
   Recover lost partitions:
     testdisk /dev/sdX
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   CHROOT INTO INSTALLED SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   mount /dev/nvme0n1p2 /mnt/disk
   mount /dev/nvme0n1p1 /mnt/disk/boot/efi
   mount --bind /dev  /mnt/disk/dev
@@ -64,16 +64,16 @@ WHAT THIS IS
 
   Inside chroot: grub-install, update-grub, passwd, apt, etc.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   NETWORKING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   SSH out:       ssh user@192.168.1.x
   Copy files:    rsync -av /mnt/disk/home user@host:/backup/
   DHCP (wired):  dhclient eth0
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
   Memory:   free -h
   Disks:    lsblk -f
   Hardware: lspci / lsusb / dmidecode
@@ -82,9 +82,9 @@ WHAT THIS IS
   Reboot:   reboot
   Poweroff: poweroff
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  WIFI (iwd — no wpa_supplicant needed)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
+  WIFI (iwd -- no wpa_supplicant needed)
+----------------------------------------------------------------
   iwctl
     device list
     station wlan0 scan
@@ -94,8 +94,8 @@ WHAT THIS IS
 
   Verify:   ip addr show wlan0
   DNS:      /etc/resolv.conf already points at 8.8.8.8 / 1.1.1.1
-  Example: iwctl station wlan0 connect pi
+  Example:  iwctl station wlan0 connect pi
 
-════════════════════════════════════════════════════════════════
+================================================================
 
 EOF
