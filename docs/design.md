@@ -78,15 +78,40 @@ the slow debootstrap.
 
 | Package | Purpose |
 |---|---|
+**Both variants (mini + full):**
+
+| Package | Purpose |
+|---|---|
 | `parted`, `gdisk` | Partition disks |
 | `btrfs-progs` | Create/repair btrfs filesystems |
 | `nvme-cli` | Inspect and manage NVMe drives |
+| `pciutils` | `lspci` — PCI device identification |
+| `usbutils` | `lsusb` — USB device identification |
+| `lshw` | Full hardware inventory |
+| `squashfs-tools` | `unsquashfs` available inside the running rescue system |
+| `bash`, `util-linux` | Standard shell and disk utilities |
+
+**Full variant only:**
+
+| Package | Purpose |
+|---|---|
 | `iwd` + `iproute2` | WiFi without a daemon (see `docs/wifi-setup.md`) |
 | `openssh-client` | SSH to router or remote hosts |
-| `squashfs-tools` | `unsquashfs` available inside the running rescue system |
 | `curl` | Fetch files over HTTP/HTTPS |
-| `pciutils`, `usbutils` | Hardware identification |
-| `bash`, `util-linux` | Standard shell and disk utilities |
+| `smartmontools`, `testdisk`, `gddrescue` | Disk health and data recovery |
+| `lvm2`, `cryptsetup` | LVM and LUKS encrypted volumes |
+
+## Bell / beep suppression
+
+The terminal bell is silenced by default in both variants via three mechanisms
+applied at rootfs build time:
+
+- `blacklist pcspkr` in `/etc/modprobe.d/nobeep.conf` — prevents the PC speaker
+  kernel module from loading, so no hardware beep can fire at all
+- `set bell-style none` in `/etc/inputrc` — tells readline (bash, python REPL,
+  etc.) to never emit the BEL character for tab-complete or end-of-history events
+- `LESS="-q"` in `/etc/profile.d/nobell.sh` — stops the `less` pager from beeping
+  when you scroll past the end of a file
 
 ## Kernel
 

@@ -144,6 +144,14 @@ printf 'export LANG=C.UTF-8\nexport LC_ALL=C.UTF-8\n' \
     > "$ROOTFS/etc/profile.d/locale.sh"
 printf 'LANG=C.UTF-8\n' > "$ROOTFS/etc/default/locale"
 
+# Mute the terminal bell entirely:
+#   1. blacklist pcspkr so the PC speaker driver never loads
+#   2. tell readline to never emit BEL (covers bash tab-complete, end-of-history)
+#   3. set LESS=-q so the pager doesn't beep on attempted scroll past EOF
+echo 'blacklist pcspkr' > "$ROOTFS/etc/modprobe.d/nobeep.conf"
+printf 'set bell-style none\n' >> "$ROOTFS/etc/inputrc"
+printf 'export LESS="-q"\n' > "$ROOTFS/etc/profile.d/nobell.sh"
+
 # readme command — type 'readme' at the rescue shell for a quick reference
 if [ "$VARIANT" = "mini" ]; then
     install -m 0755 src/rescue-readme-mini "$ROOTFS/usr/local/bin/readme"
