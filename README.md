@@ -106,7 +106,7 @@ After enrollment, `rescue.efi` will boot with Secure Boot active. See
 
 ---
 
-## Install on this machine
+## Install on a Linux machine
 
 You can register `rescue.efi` as a permanent boot entry on the same laptop alongside
 your existing OS. It will appear in your UEFI firmware boot menu.
@@ -173,7 +173,7 @@ sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
 
 ---
 
-## Using on a Windows machine
+## Install on a Windows machine
 
 rescue-efi works on any UEFI machine regardless of OS. The two obstacles for Windows
 users are **Secure Boot** and **BitLocker**.
@@ -222,66 +222,38 @@ exit
 ```
 
 rescue-mini (~150 MB) fits on most OEM ESPs. rescue-full (~700 MB) almost certainly
-does not — use mini for on-disk install, full on a USB stick.
+does not — use mini for on-disk install.
 
 ---
 
-### Option A — USB boot (one-time, no permanent changes)
-
-Boot rescue from a USB drive and return to Windows when done. Nothing on your machine
-is permanently changed.
-
-**Prepare the USB (from Windows):**
-
-Format the USB as FAT32, then:
-
-```powershell
-# Replace E: with your USB drive letter — run in admin PowerShell
-New-Item -Path "E:\EFI\BOOT" -ItemType Directory -Force
-Copy-Item rescue-mini.efi "E:\EFI\BOOT\BOOTX64.EFI"
-```
-
-**Handle Secure Boot:**
-
-If Secure Boot is **Off**: skip straight to booting the USB.
-
-If Secure Boot is **On**:
-
-1. Suspend BitLocker so Windows doesn't demand the recovery key after you change
-   firmware settings:
-   ```powershell
-   # Admin PowerShell — suspends protection for one reboot only
-   Suspend-BitLocker -MountPoint C: -RebootCount 1
-   ```
-2. Reboot into firmware settings. The fastest path on Windows 10/11:
-   **Settings → System → Recovery → Advanced startup → Restart now →
-   Troubleshoot → Advanced options → UEFI Firmware Settings → Restart**
-   (Or press F2 / Del / F10 / Esc at POST — varies by OEM.)
-3. Find **Secure Boot** and set it to **Disabled**. Save and exit.
-
-**Boot the USB:**
-
-Press **F12** (or F8 / F9 / Esc — varies by OEM) at POST to open the one-time boot
-menu. Select the USB drive.
-
-**Re-enable Secure Boot when done:**
-
-Go back into firmware settings and re-enable Secure Boot. BitLocker resumes
-automatically on the next Windows boot.
-
----
-
-### Option B — Permanent on-disk install (with Secure Boot)
+### Permanent on-disk install
 
 Installing rescue.efi permanently on the EFI partition so it appears in your firmware
-boot menu requires three things: signing the binary, copying it to the ESP, and
-registering a boot entry. All three need Linux tools (`sbsign`, `mokutil`,
-`efibootmgr`). The cleanest path is to do it from inside a booted rescue USB.
+boot menu requires signing the binary, copying it to the ESP, and registering a boot
+entry. These steps need Linux tools (`sbsign`, `mokutil`, `efibootmgr`) and access to
+EFI NVRAM variables.
 
-**Step 1: Boot rescue from USB with Secure Boot off** (follow Option A above, but don't
-re-enable Secure Boot yet).
+**Boot a Linux live USB** (Ubuntu, Fedora, or any distro) to run all steps below.
+WSL2 can sign the binary but cannot write to EFI NVRAM, so `efibootmgr` and `mokutil`
+will not work from it.
 
-**Step 2: Inside the rescue shell, sign and install:**
+**Step 1: Disable Secure Boot**
+
+Suspend BitLocker first so Windows doesn't demand the recovery key:
+
+```powershell
+# Admin PowerShell — suspends protection for one reboot only
+Suspend-BitLocker -MountPoint C: -RebootCount 1
+```
+
+Then reboot into firmware settings. Fastest path on Windows 10/11:
+**Settings → System → Recovery → Advanced startup → Restart now →
+Troubleshoot → Advanced options → UEFI Firmware Settings → Restart**
+(Or press F2 / Del / F10 / Esc at POST — varies by OEM.)
+
+Find **Secure Boot** and set it to **Disabled**. Save and exit.
+
+**Step 2: Sign and install from Linux**
 
 ```bash
 # Find your EFI partition (usually the first partition, ~100-512 MB, type vfat)
@@ -300,8 +272,9 @@ openssl req -newkey rsa:2048 -nodes -keyout /root/rescue-keys/rescue.key \
 openssl x509 -in /root/rescue-keys/rescue.crt -outform DER \
     -out /root/rescue-keys/rescue.cer
 
-# Sign the binary you booted from (it's the same file you want to install)
-cp /run/initramfs/... /mnt/efi/EFI/rescue/rescue.efi   # see note below
+# Copy and sign the binary
+mkdir -p /mnt/efi/EFI/rescue
+cp /path/to/rescue-mini.efi /mnt/efi/EFI/rescue/rescue.efi
 sbsign --key /root/rescue-keys/rescue.key \
        --cert /root/rescue-keys/rescue.crt \
        --output /mnt/efi/EFI/rescue/rescue.efi \
@@ -315,22 +288,13 @@ efibootmgr --create --disk /dev/nvme0n1 --part 1 \
 mokutil --import /root/rescue-keys/rescue.cer
 ```
 
-> **Getting the EFI binary inside rescue:** rescue runs entirely from RAM so the `.efi`
-> file itself isn't on disk inside the environment. The easiest approach is to copy the
-> file from your USB stick:
-> ```bash
-> mkdir /mnt/usb
-> mount /dev/sdb1 /mnt/usb          # adjust to your USB device
-> mkdir -p /mnt/efi/EFI/rescue
-> cp /mnt/usb/EFI/BOOT/BOOTX64.EFI /mnt/efi/EFI/rescue/rescue.efi
-> ```
+> **Getting the binary:** in the Linux live environment, download it directly:
+> `curl -LO https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-mini.efi`
+> or copy it from a FAT32 USB stick you prepared on Windows.
 
-> **Keep `rescue.key` safe.** Copy it off the rescue environment before rebooting —
-> it lives in RAM and will be gone. Copy to your USB stick or another machine:
-> ```bash
-> cp /root/rescue-keys/rescue.key /mnt/usb/
-> cp /root/rescue-keys/rescue.crt /mnt/usb/
-> ```
+> **Keep `rescue.key` safe.** Save it to a location that survives the session — your Windows
+> drive (accessible in WSL2 at `/mnt/c/`) or another machine. If you lose the key you'll
+> need to generate a new one and re-enroll it.
 
 **Step 3: Reboot into MokManager**
 
