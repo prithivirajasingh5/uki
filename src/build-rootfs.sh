@@ -38,6 +38,7 @@ PACKAGES_COMMON=(
 
     # File tools
     findutils           # find
+    tree                # directory tree listing
 
     # System services
     kmod                # modprobe/depmod

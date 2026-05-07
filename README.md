@@ -333,7 +333,7 @@ sbsign --key rescue.key --cert rescue.crt \
 | Remote access | `openssh-client`, `rsync` | — |
 | Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `pciutils` only |
 | Editors | `nano`, `vim-tiny` | `nano` only |
-| Utilities | `curl`, `less`, `file`, `find`, `htop`, `lsof`, `strace` | `less`, `find` only |
+| Utilities | `curl`, `less`, `file`, `find`, `tree`, `htop`, `lsof`, `strace` | `less`, `find`, `tree` only |
 
 Type `readme` at the rescue shell for a quick reference card.
 
