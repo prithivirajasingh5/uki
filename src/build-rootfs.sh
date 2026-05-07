@@ -33,6 +33,9 @@ PACKAGES_COMMON=(
     nano
     less
 
+    # Hardware inspection (needed in mini to diagnose PCI devices)
+    pciutils            # lspci
+
     # File tools
     findutils           # find
 
@@ -48,7 +51,6 @@ PACKAGES_COMMON=(
 # ── packages only in the full variant ────────────────────────────────────────
 PACKAGES_FULL=(
     # Hardware inspection
-    pciutils
     usbutils
     curl
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
@@ -143,7 +145,43 @@ else
     install -m 0755 src/rescue-readme "$ROOTFS/usr/local/bin/readme"
 fi
 
-# ── full-only: WiFi, kernel modules, firmware ────────────────────────────────
+# ── kernel modules ───────────────────────────────────────────────────────────
+KVER=$(uname -r)
+if [ "$VARIANT" = "full" ]; then
+    if [ -d "/lib/modules/$KVER" ]; then
+        echo "Copying kernel modules ($KVER) — this may take a minute..."
+        mkdir -p "$ROOTFS/lib/modules"
+        cp -a "/lib/modules/$KVER" "$ROOTFS/lib/modules/"
+        KMOD="$ROOTFS/lib/modules/$KVER/kernel"
+        rm -rf "$KMOD/drivers/gpu" "$KMOD/sound" "$KMOD/drivers/media"
+        depmod -b "$ROOTFS" "$KVER"
+    else
+        echo "warning: /lib/modules/$KVER not found — NVMe/NIC drivers will not load" >&2
+    fi
+else
+    # Mini: copy only storage drivers so NVMe/SATA drives appear in /dev.
+    # udev will autoload them via MODALIAS on boot; modprobe also works manually.
+    if [ -d "/lib/modules/$KVER" ]; then
+        echo "Copying storage kernel modules ($KVER)..."
+        mkdir -p "$ROOTFS/lib/modules/$KVER/kernel/drivers"
+        # Module metadata files (modules.dep, modules.alias, modules.builtin …)
+        find "/lib/modules/$KVER" -maxdepth 1 -type f \
+            -exec cp {} "$ROOTFS/lib/modules/$KVER/" \;
+        # Driver directories: NVMe, AHCI/SATA, SCSI layer (dep of ata), USB storage
+        for drv in nvme ata scsi mmc usb/storage usb/host; do
+            src="/lib/modules/$KVER/kernel/drivers/$drv"
+            [ -d "$src" ] || continue
+            dest="$ROOTFS/lib/modules/$KVER/kernel/drivers/$drv"
+            mkdir -p "$(dirname "$dest")"
+            cp -a "$src" "$dest"
+        done
+        depmod -b "$ROOTFS" "$KVER"
+    else
+        echo "warning: /lib/modules/$KVER not found — NVMe drivers will not load" >&2
+    fi
+fi
+
+# ── full-only: WiFi, firmware ─────────────────────────────────────────────────
 if [ "$VARIANT" = "full" ]; then
     # Enable iwd so it starts on boot and manages any wifi interface
     systemctl --root="$ROOTFS" enable iwd
@@ -164,19 +202,6 @@ EOF
 nameserver 8.8.8.8
 nameserver 1.1.1.1
 EOF
-
-    # Kernel modules — must match the kernel embedded in the UKI
-    KVER=$(uname -r)
-    if [ -d "/lib/modules/$KVER" ]; then
-        echo "Copying kernel modules ($KVER) — this may take a minute..."
-        mkdir -p "$ROOTFS/lib/modules"
-        cp -a "/lib/modules/$KVER" "$ROOTFS/lib/modules/"
-        KMOD="$ROOTFS/lib/modules/$KVER/kernel"
-        rm -rf "$KMOD/drivers/gpu" "$KMOD/sound" "$KMOD/drivers/media"
-        depmod -b "$ROOTFS" "$KVER"
-    else
-        echo "warning: /lib/modules/$KVER not found — NVMe/NIC drivers will not load" >&2
-    fi
 
     # Firmware — WiFi, NIC controllers, etc.
     if [ -d /lib/firmware ]; then
