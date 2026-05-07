@@ -323,7 +323,7 @@ sbsign --key rescue.key --cert rescue.crt \
 | Category | Tools | mini |
 |---|---|:---:|
 | Partitioning | `parted`, `gdisk` | ✓ |
-| Filesystems | `btrfs-progs`, `e2fsprogs`, `dosfstools`, `xfsprogs`, `ntfs-3g`, `exfatprogs` | btrfs/ext4/fat only |
+| Filesystems | `btrfs-progs`, `e2fsprogs`, `dosfstools`, `xfsprogs`, `ntfs-3g`, `exfatprogs` | ✓ |
 | Encryption / LVM | `cryptsetup`, `lvm2` | — |
 | NVMe | `nvme-cli` | ✓ |
 | Disk health | `smartmontools`, `testdisk`, `ddrescue` | — |

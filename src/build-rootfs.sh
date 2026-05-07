@@ -24,6 +24,9 @@ PACKAGES_COMMON=(
     nvme-cli
     e2fsprogs           # ext4: mkfs.ext4, fsck.ext4
     dosfstools          # FAT/EFI: mkfs.fat, fsck.fat
+    xfsprogs            # XFS: xfs_repair, mkfs.xfs
+    ntfs-3g             # NTFS read/write
+    exfatprogs          # exFAT
 
     # EFI boot management
     efibootmgr
@@ -58,10 +61,6 @@ PACKAGES_FULL=(
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
     lshw                # full hardware inventory
 
-    # Additional filesystems
-    xfsprogs            # XFS: xfs_repair, mkfs.xfs
-    ntfs-3g             # NTFS read/write
-    exfatprogs          # exFAT
     xz-utils            # decompress .xz archives
 
     # LVM + LUKS
