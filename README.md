@@ -331,7 +331,7 @@ sbsign --key rescue.key --cert rescue.crt \
 | WiFi | `iwd` + `iproute2` (no wpa_supplicant needed) | — |
 | Networking | `dhclient`, `ping`, `traceroute`, `nc`, `tcpdump`, `ethtool`, `dig` | — |
 | Remote access | `openssh-client`, `rsync` | — |
-| Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `pciutils` only |
+| Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `lshw`, `pciutils` only |
 | Editors | `nano`, `vim-tiny` | ✓ |
 | Utilities | `curl`, `less`, `file`, `find`, `tree`, `htop`, `lsof`, `strace` | `less`, `find`, `tree` only |
 

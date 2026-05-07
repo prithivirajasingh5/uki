@@ -39,6 +39,7 @@ PACKAGES_COMMON=(
 
     # Hardware inspection (needed in mini to diagnose PCI devices)
     pciutils            # lspci
+    lshw                # full hardware inventory
 
     # File tools
     findutils           # find
@@ -59,7 +60,6 @@ PACKAGES_FULL=(
     usbutils
     curl
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
-    lshw                # full hardware inventory
 
     xz-utils            # decompress .xz archives
 
