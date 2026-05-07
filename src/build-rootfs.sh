@@ -24,7 +24,6 @@ PACKAGES_COMMON=(
     nvme-cli
     e2fsprogs           # ext4: mkfs.ext4, fsck.ext4
     dosfstools          # FAT/EFI: mkfs.fat, fsck.fat
-    xfsprogs            # XFS: xfs_repair, mkfs.xfs
     ntfs-3g             # NTFS read/write
     exfatprogs          # exFAT
 
@@ -57,6 +56,9 @@ PACKAGES_COMMON=(
 
 # ── packages only in the full variant ────────────────────────────────────────
 PACKAGES_FULL=(
+    # Filesystems
+    xfsprogs            # XFS: xfs_repair, mkfs.xfs
+
     # Networking + file transfer
     curl
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
