@@ -48,17 +48,14 @@ Or grab them from the [releases page](https://github.com/prithivirajasingh5/uki/
 **Option B — Build from source** (Debian/Ubuntu x86_64):
 
 ```bash
-# full (~15 min)
+# builds both rescue-full.efi and rescue-mini.efi (~15 min)
 curl -fsSL https://raw.githubusercontent.com/prithivirajasingh5/uki/master/install.sh | bash
-
-# mini (~5 min)
-curl -fsSL https://raw.githubusercontent.com/prithivirajasingh5/uki/master/install.sh | VARIANT=mini bash
 ```
 
-The script clones this repo, installs any missing build dependencies, and runs `make all`.
+The script clones this repo, installs any missing build dependencies, and runs `sudo make all`.
 It will prompt for your sudo password when the build starts.
 
-Output: `~/rescue-efi/rescue-full.efi` or `~/rescue-efi/rescue-mini.efi`
+Output: `~/rescue-efi/rescue-full.efi` and `~/rescue-efi/rescue-mini.efi`
 
 ---
 
@@ -174,20 +171,22 @@ sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
 
 ## What's inside
 
-| Category | Tools |
-|---|---|
-| Partitioning | `parted`, `gdisk` |
-| Filesystems | `btrfs-progs`, `e2fsprogs`, `dosfstools`, `xfsprogs`, `ntfs-3g`, `exfatprogs` |
-| Encryption / LVM | `cryptsetup`, `lvm2` |
-| NVMe | `nvme-cli` |
-| Disk health | `smartmontools`, `testdisk`, `ddrescue` |
-| EFI boot repair | `efibootmgr`, `grub-efi-amd64-bin` |
-| WiFi | `iwd` + `iproute2` (no wpa_supplicant needed) |
-| Networking | `dhclient`, `ping`, `traceroute`, `nc`, `tcpdump`, `ethtool`, `dig` |
-| Remote access | `openssh-client`, `rsync` |
-| Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` |
-| Editors | `nano`, `vim-tiny` |
-| Utilities | `curl`, `less`, `file`, `find`, `htop`, `lsof`, `strace` |
+*Full variant. Mini includes only the disk / EFI repair subset (partitioning, btrfs, e2fs, dosfs, nvme, efibootmgr, nano, pciutils).*
+
+| Category | Tools | mini |
+|---|---|:---:|
+| Partitioning | `parted`, `gdisk` | ✓ |
+| Filesystems | `btrfs-progs`, `e2fsprogs`, `dosfstools`, `xfsprogs`, `ntfs-3g`, `exfatprogs` | btrfs/ext4/fat only |
+| Encryption / LVM | `cryptsetup`, `lvm2` | — |
+| NVMe | `nvme-cli` | ✓ |
+| Disk health | `smartmontools`, `testdisk`, `ddrescue` | — |
+| EFI boot repair | `efibootmgr`, `grub-efi-amd64-bin` | ✓ |
+| WiFi | `iwd` + `iproute2` (no wpa_supplicant needed) | — |
+| Networking | `dhclient`, `ping`, `traceroute`, `nc`, `tcpdump`, `ethtool`, `dig` | — |
+| Remote access | `openssh-client`, `rsync` | — |
+| Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `pciutils` only |
+| Editors | `nano`, `vim-tiny` | `nano` only |
+| Utilities | `curl`, `less`, `file`, `find`, `htop`, `lsof`, `strace` | `less`, `find` only |
 
 Type `readme` at the rescue shell for a quick reference card.
 
@@ -198,8 +197,9 @@ Type `readme` at the rescue shell for a quick reference card.
 ```bash
 git clone https://github.com/prithivirajasingh5/uki.git
 cd uki
-sudo make full    # builds rescue-full.efi
-sudo make mini    # builds rescue-mini.efi
+sudo make all     # builds both rescue-full.efi and rescue-mini.efi
+sudo make full    # builds rescue-full.efi only
+sudo make mini    # builds rescue-mini.efi only
 ```
 
 Intermediate steps if you want finer control:
@@ -280,10 +280,11 @@ See [`docs/wifi-setup.md`](docs/wifi-setup.md) for hidden networks, static IP, a
 
 ```bash
 cd ~/rescue-efi
-sudo make full                      # rebuild full
-sudo make mini                      # rebuild mini
+sudo make all                       # rebuild both variants
+sudo make full                      # rebuild full only
+sudo make mini                      # rebuild mini only
 sudo make uki VARIANT=full          # rebuild only the EFI (rootfs/squashfs unchanged)
-sudo make clean                     # remove all build artifacts
+sudo make clean && sudo make all    # full clean rebuild of both variants
 ```
 
 ---
