@@ -138,6 +138,12 @@ done
 echo 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
     > "$ROOTFS/etc/profile.d/path.sh"
 
+# C.UTF-8 is built into glibc — no locales package or locale-gen needed.
+# Without this, less and other tools treat multi-byte UTF-8 as binary.
+printf 'export LANG=C.UTF-8\nexport LC_ALL=C.UTF-8\n' \
+    > "$ROOTFS/etc/profile.d/locale.sh"
+printf 'LANG=C.UTF-8\n' > "$ROOTFS/etc/default/locale"
+
 # readme command — type 'readme' at the rescue shell for a quick reference
 if [ "$VARIANT" = "mini" ]; then
     install -m 0755 src/rescue-readme-mini "$ROOTFS/usr/local/bin/readme"
