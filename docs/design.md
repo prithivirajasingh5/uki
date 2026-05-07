@@ -86,7 +86,6 @@ the slow debootstrap.
 | `btrfs-progs` | Create/repair btrfs filesystems |
 | `nvme-cli` | Inspect and manage NVMe drives |
 | `pciutils` | `lspci` — PCI device identification |
-| `usbutils` | `lsusb` — USB device identification |
 | `lshw` | Full hardware inventory |
 | `squashfs-tools` | `unsquashfs` available inside the running rescue system |
 | `bash`, `util-linux` | Standard shell and disk utilities |
@@ -95,6 +94,7 @@ the slow debootstrap.
 
 | Package | Purpose |
 |---|---|
+| `usbutils` | `lsusb` — USB device identification |
 | `iwd` + `iproute2` | WiFi without a daemon (see `docs/wifi-setup.md`) |
 | `openssh-client` | SSH to router or remote hosts |
 | `curl` | Fetch files over HTTP/HTTPS |

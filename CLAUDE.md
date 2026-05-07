@@ -18,7 +18,7 @@ Shell scripts (primary), Python (secondary if needed), Makefile for orchestratio
 - `nvme-cli` — NVMe drive management
 - `iwd` + `iproute2` — wifi (lightweight, no wpa_supplicant daemon needed)
 - `openssh-client` — SSH to router/other hosts
-- `bash`, `util-linux`, `pciutils`, `usbutils` (both variants), `curl`, `tree`
+- `bash`, `util-linux`, `pciutils`, `usbutils`, `curl`, `tree`
 
 ## Build pipeline (in order)
 1. `make rootfs` — debootstrap minimal Debian into `work/rootfs/`

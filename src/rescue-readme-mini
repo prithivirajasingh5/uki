@@ -64,13 +64,6 @@ WHAT THIS IS
   less /mnt/var/log/syslog
 
 ----------------------------------------------------------------
-  HARDWARE INSPECTION
-----------------------------------------------------------------
-  lspci -v             list PCI devices (NVMe controllers, NICs, etc.)
-  lsusb                list USB devices
-  lshw -short          full hardware inventory (CPU, RAM, disks)
-
-----------------------------------------------------------------
   SYSTEM
 ----------------------------------------------------------------
   Reboot:   reboot

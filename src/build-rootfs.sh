@@ -39,7 +39,6 @@ PACKAGES_COMMON=(
 
     # Hardware inspection (needed in mini to diagnose PCI devices)
     pciutils            # lspci
-    usbutils            # lsusb
     lshw                # full hardware inventory
 
     # File tools
@@ -57,6 +56,9 @@ PACKAGES_COMMON=(
 
 # ── packages only in the full variant ────────────────────────────────────────
 PACKAGES_FULL=(
+    # Hardware inspection
+    usbutils            # lsusb
+
     # Networking + file transfer
     curl
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
