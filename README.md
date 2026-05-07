@@ -26,8 +26,12 @@ Two variants are available:
 | Network tools | ✓ | — |
 | Hardware info (lshw, dmidecode) | ✓ | — |
 
-**Choose mini** if you just need to partition disks, fix grub, or edit a config file — and your EFI partition is small.
+**Choose mini** if you just need to partition disks, fix grub, or edit a config file.
 **Choose full** if you need WiFi, SSH, data recovery, LVM, or LUKS.
+
+> **EFI partition reality check:** Most OEM laptops shipped with Windows have a 100–260 MB EFI
+> partition — `rescue-full.efi` at ~700 MB won't fit. Even Linux installers typically create
+> 512 MB ESPs, which is still tight. **Use mini for on-disk installation; put full on a USB drive.**
 
 **Option A — Download pre-built** (fastest):
 
