@@ -175,6 +175,16 @@ else
             mkdir -p "$(dirname "$dest")"
             cp -a "$src" "$dest"
         done
+        # Filesystem modules: btrfs.ko + its dependencies (raid6_pq, xor, blake2b).
+        # Copying kernel/lib and kernel/crypto wholesale (~920 KB) avoids hardcoding
+        # specific filenames that change across kernel versions.
+        for mod_dir in fs/btrfs lib crypto; do
+            src="/lib/modules/$KVER/kernel/$mod_dir"
+            [ -d "$src" ] || continue
+            dest="$ROOTFS/lib/modules/$KVER/kernel/$mod_dir"
+            mkdir -p "$(dirname "$dest")"
+            cp -a "$src" "$dest"
+        done
         depmod -b "$ROOTFS" "$KVER"
     else
         echo "warning: /lib/modules/$KVER not found — NVMe drivers will not load" >&2
