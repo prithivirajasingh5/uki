@@ -37,7 +37,9 @@ your existing OS — no USB drive needed at rescue time.
 | WiFi (iwd) | — | ✓ |
 | SSH / rsync | — | ✓ |
 | Network tools | — | ✓ |
-| Hardware info (lshw, dmidecode) | — | ✓ |
+| Hardware info (lspci, lshw) | ✓ | ✓ |
+| Extended hardware info (lsusb, dmidecode) | — | ✓ |
+| Silent terminal (no bell) | ✓ | ✓ |
 
 **Start with mini.** It fits on almost any EFI partition and covers the most common rescue
 tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
@@ -332,6 +334,7 @@ sbsign --key rescue.key --cert rescue.crt \
 | Networking | `dhclient`, `ping`, `traceroute`, `nc`, `tcpdump`, `ethtool`, `dig` | — |
 | Remote access | `openssh-client`, `rsync` | — |
 | Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `lshw`, `pciutils` only |
+| Terminal bell | silenced by default | silenced by default |
 | Editors | `nano`, `vim-tiny` | ✓ |
 | Utilities | `curl`, `less`, `file`, `find`, `tree`, `htop`, `lsof`, `strace` | `less`, `find`, `tree` only |
 
