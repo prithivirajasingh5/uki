@@ -332,7 +332,7 @@ sbsign --key rescue.key --cert rescue.crt \
 | Networking | `dhclient`, `ping`, `traceroute`, `nc`, `tcpdump`, `ethtool`, `dig` | — |
 | Remote access | `openssh-client`, `rsync` | — |
 | Hardware info | `lshw`, `dmidecode`, `pciutils`, `usbutils` | `pciutils` only |
-| Editors | `nano`, `vim-tiny` | `nano` only |
+| Editors | `nano`, `vim-tiny` | ✓ |
 | Utilities | `curl`, `less`, `file`, `find`, `tree`, `htop`, `lsof`, `strace` | `less`, `find`, `tree` only |
 
 Type `readme` at the rescue shell for a quick reference card.

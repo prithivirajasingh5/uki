@@ -31,6 +31,7 @@ PACKAGES_COMMON=(
 
     # Editors + pager
     nano
+    vim-tiny            # vi
     less
 
     # Hardware inspection (needed in mini to diagnose PCI devices)
@@ -92,8 +93,7 @@ PACKAGES_FULL=(
     lsof
     strace
 
-    # Extra editors + tools
-    vim-tiny
+    # Extra tools
     file
 )
 
