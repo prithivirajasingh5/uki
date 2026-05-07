@@ -173,6 +173,200 @@ sudo cp ~/rescue-efi/rescue-full.efi /boot/efi/EFI/rescue/rescue.efi
 
 ---
 
+## Using on a Windows machine
+
+rescue-efi works on any UEFI machine regardless of OS. The two obstacles for Windows
+users are **Secure Boot** and **BitLocker**.
+
+### Step 0 — Back up your BitLocker recovery key (do this first)
+
+**Do this before touching anything in firmware settings.** Changing Secure Boot state
+shifts the TPM measurements that BitLocker relies on. Windows may demand your 48-digit
+recovery key on the very next boot. If you don't have it, your Windows drive is locked.
+
+Find your key at: **account.microsoft.com/devices/recoverykey**
+
+Or from an admin PowerShell:
+
+```powershell
+manage-bde -protectors -get C:
+```
+
+Save the key somewhere other than that laptop (phone, paper, another machine).
+
+### Step 1 — Check Secure Boot state
+
+```
+msinfo32
+```
+
+Look for **Secure Boot State** under System Summary. If it says **On**, you must either
+disable it or sign the binary before it will boot.
+
+### Step 2 — Check your EFI partition size
+
+From an admin PowerShell:
+
+```powershell
+Get-Partition | Where-Object IsSystem | Select-Object DiskNumber, PartitionNumber, @{n='SizeMB';e={[math]::Round($_.Size/1MB)}}
+```
+
+Or from an admin Command Prompt:
+
+```
+diskpart
+list disk
+select disk 0
+list partition   # look for Type: System
+exit
+```
+
+rescue-mini (~150 MB) fits on most OEM ESPs. rescue-full (~700 MB) almost certainly
+does not — use mini for on-disk install, full on a USB stick.
+
+---
+
+### Option A — USB boot (one-time, no permanent changes)
+
+Boot rescue from a USB drive and return to Windows when done. Nothing on your machine
+is permanently changed.
+
+**Prepare the USB (from Windows):**
+
+Format the USB as FAT32, then:
+
+```powershell
+# Replace E: with your USB drive letter — run in admin PowerShell
+New-Item -Path "E:\EFI\BOOT" -ItemType Directory -Force
+Copy-Item rescue-mini.efi "E:\EFI\BOOT\BOOTX64.EFI"
+```
+
+**Handle Secure Boot:**
+
+If Secure Boot is **Off**: skip straight to booting the USB.
+
+If Secure Boot is **On**:
+
+1. Suspend BitLocker so Windows doesn't demand the recovery key after you change
+   firmware settings:
+   ```powershell
+   # Admin PowerShell — suspends protection for one reboot only
+   Suspend-BitLocker -MountPoint C: -RebootCount 1
+   ```
+2. Reboot into firmware settings. The fastest path on Windows 10/11:
+   **Settings → System → Recovery → Advanced startup → Restart now →
+   Troubleshoot → Advanced options → UEFI Firmware Settings → Restart**
+   (Or press F2 / Del / F10 / Esc at POST — varies by OEM.)
+3. Find **Secure Boot** and set it to **Disabled**. Save and exit.
+
+**Boot the USB:**
+
+Press **F12** (or F8 / F9 / Esc — varies by OEM) at POST to open the one-time boot
+menu. Select the USB drive.
+
+**Re-enable Secure Boot when done:**
+
+Go back into firmware settings and re-enable Secure Boot. BitLocker resumes
+automatically on the next Windows boot.
+
+---
+
+### Option B — Permanent on-disk install (with Secure Boot)
+
+Installing rescue.efi permanently on the EFI partition so it appears in your firmware
+boot menu requires three things: signing the binary, copying it to the ESP, and
+registering a boot entry. All three need Linux tools (`sbsign`, `mokutil`,
+`efibootmgr`). The cleanest path is to do it from inside a booted rescue USB.
+
+**Step 1: Boot rescue from USB with Secure Boot off** (follow Option A above, but don't
+re-enable Secure Boot yet).
+
+**Step 2: Inside the rescue shell, sign and install:**
+
+```bash
+# Find your EFI partition (usually the first partition, ~100-512 MB, type vfat)
+lsblk -f
+
+# Mount it
+mkdir /mnt/efi
+mount /dev/nvme0n1p1 /mnt/efi   # adjust device as shown by lsblk
+
+# Generate a signing key
+mkdir -p /root/rescue-keys
+openssl req -newkey rsa:2048 -nodes -keyout /root/rescue-keys/rescue.key \
+    -new -x509 -sha256 -days 3650 \
+    -subj "/CN=Rescue EFI Signing Key/" \
+    -out /root/rescue-keys/rescue.crt
+openssl x509 -in /root/rescue-keys/rescue.crt -outform DER \
+    -out /root/rescue-keys/rescue.cer
+
+# Sign the binary you booted from (it's the same file you want to install)
+cp /run/initramfs/... /mnt/efi/EFI/rescue/rescue.efi   # see note below
+sbsign --key /root/rescue-keys/rescue.key \
+       --cert /root/rescue-keys/rescue.crt \
+       --output /mnt/efi/EFI/rescue/rescue.efi \
+       /mnt/efi/EFI/rescue/rescue.efi
+
+# Register the boot entry
+efibootmgr --create --disk /dev/nvme0n1 --part 1 \
+    --label "Rescue EFI" --loader '\EFI\rescue\rescue.efi'
+
+# Enroll your signing key — set a short one-time password when prompted
+mokutil --import /root/rescue-keys/rescue.cer
+```
+
+> **Getting the EFI binary inside rescue:** rescue runs entirely from RAM so the `.efi`
+> file itself isn't on disk inside the environment. The easiest approach is to copy the
+> file from your USB stick:
+> ```bash
+> mkdir /mnt/usb
+> mount /dev/sdb1 /mnt/usb          # adjust to your USB device
+> mkdir -p /mnt/efi/EFI/rescue
+> cp /mnt/usb/EFI/BOOT/BOOTX64.EFI /mnt/efi/EFI/rescue/rescue.efi
+> ```
+
+> **Keep `rescue.key` safe.** Copy it off the rescue environment before rebooting —
+> it lives in RAM and will be gone. Copy to your USB stick or another machine:
+> ```bash
+> cp /root/rescue-keys/rescue.key /mnt/usb/
+> cp /root/rescue-keys/rescue.crt /mnt/usb/
+> ```
+
+**Step 3: Reboot into MokManager**
+
+On the next boot, **MokManager** appears (blue screen). Enter the password you set,
+select **Enroll MOK → Continue → Yes → Reboot**.
+
+**Step 4: Re-enable Secure Boot**
+
+Go back into firmware settings and re-enable Secure Boot. rescue.efi is now signed
+with a key your firmware trusts and will boot normally.
+
+**Updating rescue.efi later:**
+
+Re-sign with the same key, then copy — the boot entry and enrolled certificate stay
+valid:
+
+```bash
+sbsign --key rescue.key --cert rescue.crt \
+       --output rescue-mini.efi rescue-mini.efi
+# then copy to EFI partition as before
+```
+
+---
+
+### Risk summary
+
+| Action | Risk | How to avoid it |
+|---|---|---|
+| Change Secure Boot in firmware | BitLocker demands recovery key on next Windows boot | Back up recovery key first; suspend BitLocker before entering firmware |
+| Enroll a MOK key | TPM PCR values shift, BitLocker may trigger | Same — suspend BitLocker before rebooting into MokManager |
+| Copy files to EFI partition | Accidental overwrite of Windows bootloader | Only write to `EFI\rescue\` — never touch `EFI\Microsoft\` |
+| Lose `rescue.key` | Can't sign updated rescue.efi; must re-enroll a new key | Copy key off the rescue environment to USB or another machine before rebooting |
+| Skip the recovery key backup | Permanent data loss if BitLocker triggers and key is unknown | Always back up first — takes 30 seconds at account.microsoft.com/devices/recoverykey |
+
+---
+
 ## What's inside
 
 *Full variant. Mini includes only the disk / EFI repair subset (partitioning, btrfs, e2fs, dosfs, nvme, efibootmgr, nano, pciutils).*
