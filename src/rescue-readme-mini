@@ -10,13 +10,16 @@ WHAT THIS IS
   Built with: make mini   from github.com/prithivirajasingh5/uki
 
 ----------------------------------------------------------------
-  DISK INSPECTION
+  DISK + HARDWARE INSPECTION
 ----------------------------------------------------------------
   lsblk -f              list disks and partitions with filesystems
   blkid                 show UUIDs and filesystem types
   fdisk -l              list partition tables
   nvme list             list NVMe drives
   nvme smart-log /dev/nvme0   NVMe health info
+  lspci                 list PCI devices
+  lsusb                 list USB devices
+  lshw                  full hardware inventory
 
 ----------------------------------------------------------------
   PARTITIONING

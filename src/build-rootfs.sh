@@ -37,8 +37,9 @@ PACKAGES_COMMON=(
     vim-tiny            # vi
     less
 
-    # Hardware inspection (needed in mini to diagnose PCI devices)
+    # Hardware inspection (needed in mini to diagnose PCI/USB devices)
     pciutils            # lspci
+    usbutils            # lsusb
     lshw                # full hardware inventory
 
     # File tools
@@ -56,9 +57,6 @@ PACKAGES_COMMON=(
 
 # ── packages only in the full variant ────────────────────────────────────────
 PACKAGES_FULL=(
-    # Hardware inspection
-    usbutils            # lsusb
-
     # Networking + file transfer
     curl
     dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
@@ -191,6 +189,15 @@ else
             mkdir -p "$(dirname "$dest")"
             cp -a "$src" "$dest"
         done
+        # Enterprise HBA / SAN drivers — never needed on personal hardware.
+        # These subdirs can total 100–200 MB on a desktop kernel; strip them to
+        # keep RAM usage down. Consumer SATA still works via sd_mod + ahci.
+        for hba in lpfc qla2xxx qla4xxx mpt2sas mpt3sas megaraid megaraid_sas \
+                   aacraid hpsa pm80xx pm8001 aic7xxx aic94xx csiostor \
+                   be2iscsi bnx2i cxgb4i iscsi_tcp libiscsi fcoe libfc; do
+            rm -rf "$ROOTFS/lib/modules/$KVER/kernel/drivers/scsi/$hba"
+        done
+
         # Filesystem modules: btrfs.ko + its dependencies (raid6_pq, xor, blake2b).
         # Copying kernel/lib and kernel/crypto wholesale (~920 KB) avoids hardcoding
         # specific filenames that change across kernel versions.
@@ -240,6 +247,19 @@ EOF
         rm -rf "$FW/qcom"
         rm -rf "$FW/cirrus"
     fi
+fi
+
+# ── mini-only: strip docs, man pages, and locale data ────────────────────────
+# These directories serve no purpose in a rescue shell and can add 50–150 MB
+# across a typical Debian package set. LANG=C.UTF-8 is glibc-builtin so no
+# locale files are needed.
+if [ "$VARIANT" = "mini" ]; then
+    rm -rf "$ROOTFS/usr/share/doc"
+    rm -rf "$ROOTFS/usr/share/man"
+    rm -rf "$ROOTFS/usr/share/info"
+    rm -rf "$ROOTFS/usr/share/groff"
+    find "$ROOTFS/usr/share/locale" -mindepth 1 -maxdepth 1 -type d \
+        -exec rm -rf {} +
 fi
 
 # Clean package cache
