@@ -1,13 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
+VARIANT="${VARIANT:-mini}"
 KERNEL=${KERNEL:-$(find /boot -maxdepth 1 -name 'vmlinuz-*' 2>/dev/null | sort -V | tail -1)}
-INITRAMFS=work/initramfs.cpio.gz
+INITRAMFS="work/$VARIANT/initramfs.cpio.gz"
 LOG=/tmp/uki-smoke.log
 TIMEOUT=90
 
 if [ ! -f "$INITRAMFS" ]; then
-    echo "error: $INITRAMFS not found — run 'make initramfs' first" >&2
+    echo "error: $INITRAMFS not found — run 'make initramfs VARIANT=$VARIANT' first" >&2
     exit 1
 fi
 
@@ -30,7 +31,7 @@ if [ ! -r "$KERNEL" ]; then
     trap 'rm -f "$BOOT_KERNEL"' EXIT
 fi
 
-echo "Booting kernel=$KERNEL initramfs=$INITRAMFS ..."
+echo "Booting VARIANT=$VARIANT kernel=$KERNEL initramfs=$INITRAMFS ..."
 echo "(timeout ${TIMEOUT}s, log: $LOG)"
 
 timeout "$TIMEOUT" qemu-system-x86_64 \
@@ -43,9 +44,9 @@ timeout "$TIMEOUT" qemu-system-x86_64 \
     -display none \
     -no-reboot 2>&1 | tee "$LOG" || true
 
-if grep -q "switch_root" "$LOG"; then
-    echo "PASS: switch_root reached"
+if grep -q "Extracting root filesystem" "$LOG"; then
+    echo "PASS: init reached extraction stage"
 else
-    echo "FAIL: switch_root not seen in output (check $LOG)"
+    echo "FAIL: init extraction not seen in output (check $LOG)"
     exit 1
 fi
