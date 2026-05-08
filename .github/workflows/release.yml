@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. stable/rescue-efi-v5)"
+        required: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y debootstrap squashfs-tools systemd-ukify busybox-static
+
+      - name: Build both variants
+        run: sudo make all
+
+      - name: Generate checksums
+        run: sha256sum rescue-mini.efi rescue-full.efi > SHA256SUMS
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: ${{ github.event.inputs.tag }}
+          body: |
+            ## rescue-efi
+
+            | File | Description |
+            |------|-------------|
+            | `rescue-mini.efi` | Minimal rescue: disk tools, EFI repair, filesystem tools (~90 MB, ~1 GB RAM) |
+            | `rescue-full.efi` | Full rescue: adds WiFi, SSH, LVM, LUKS, data recovery (~700 MB, ~2 GB RAM) |
+            | `SHA256SUMS` | SHA-256 checksums for both files |
+
+            See [README](https://github.com/${{ github.repository }}/blob/master/README.md) for install instructions.
+          files: |
+            rescue-mini.efi
+            rescue-full.efi
+            SHA256SUMS
