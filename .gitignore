@@ -1,5 +1,6 @@
 .env
 .env.local
+keys/
 CLAUDE.local.md
 node_modules/
 __pycache__/
