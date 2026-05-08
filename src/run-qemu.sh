@@ -12,6 +12,12 @@ if [ ! -f "$OUTPUT" ]; then
     exit 1
 fi
 
+if [ ! -w /dev/kvm ]; then
+    echo "error: /dev/kvm not accessible — install qemu-kvm and ensure your user is in the kvm group" >&2
+    echo "  sudo apt install qemu-kvm && sudo usermod -aG kvm \$USER  (then log out and back in)" >&2
+    exit 1
+fi
+
 if [ ! -f "$OVMF_CODE" ] || [ ! -f "$OVMF_VARS_TEMPLATE" ]; then
     echo "error: OVMF_CODE_4M.fd / OVMF_VARS_4M.fd not found — install ovmf package" >&2
     exit 1
