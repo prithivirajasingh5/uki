@@ -25,8 +25,8 @@ your existing OS — no USB drive needed at rescue time.
 
 | | `rescue-mini.efi` | `rescue-full.efi` |
 |---|---|---|
-| EFI size | ~150 MB | ~700 MB |
-| RAM needed | ~500 MB | ~2 GB |
+| EFI size | ~90 MB | ~700 MB |
+| RAM needed | ~1 GB | ~2 GB |
 | Disk / partition / format | ✓ | ✓ |
 | EFI boot repair (efibootmgr, grub) | ✓ | ✓ |
 | btrfs, ext4, FAT filesystems | ✓ | ✓ |
@@ -62,7 +62,7 @@ tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
 ```bash
 mkdir -p ~/rescue-efi
 
-# mini (~150 MB) — recommended for on-disk install
+# mini (~90 MB) — recommended for on-disk install
 wget -O ~/rescue-efi/rescue-mini.efi \
     https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-mini.efi
 
@@ -113,7 +113,7 @@ and reboot again. Your key is now trusted by the firmware. Continue to Step 3.
 
 ### Step 3 of 4 — Install on the EFI partition
 
-Check free space on your EFI partition (~150 MB needed for mini, ~700 MB for full):
+Check free space on your EFI partition (~90 MB needed for mini, ~700 MB for full):
 
 ```bash
 df -h /boot/efi
@@ -212,7 +212,7 @@ list partition
 exit
 ```
 
-Look for the **System** type partition. rescue-mini (~150 MB) fits on most OEM ESPs.
+Look for the **System** type partition. rescue-mini (~90 MB) fits on most OEM ESPs.
 rescue-full (~700 MB) almost certainly does not — use mini for on-disk install.
 
 ### Step 3 of 6 — Download rescue-mini.efi on Windows
@@ -393,7 +393,7 @@ sudo make clean && sudo make all    # full clean rebuild of both variants
 - Build host: Debian or Ubuntu, x86_64
 - Build disk space: ~500 MB for mini, ~2 GB for full
 - Rescue target: UEFI firmware (BIOS/MBR not supported)
-- Rescue target RAM: ~500 MB for mini, ~2 GB for full
+- Rescue target RAM: ~1 GB for mini, ~2 GB for full
 
 Build-time packages installed automatically by `make deps`:
 `debootstrap`, `squashfs-tools`, `systemd-ukify`, `busybox-static`
