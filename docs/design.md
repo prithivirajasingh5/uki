@@ -48,7 +48,7 @@ separate partition. This means:
 
 - No disk partitioning required on the rescue target
 - The entire system fits in one EFI file
-- zstd compression keeps the image small (~66 MB for a full Debian environment)
+- zstd compression keeps the image compact (see README for current sizes per variant)
 
 The trade-off: the full rootfs is extracted into tmpfs on every boot. On a machine
 with 4 GB RAM this uses ~180 MB. The mini variant requires ~1 GB RAM; the full

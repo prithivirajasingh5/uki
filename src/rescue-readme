@@ -78,6 +78,7 @@ WHAT THIS IS
   Disks:    lsblk -f
   Hardware: lspci / lsusb / dmidecode
   EFI boot: efibootmgr -v
+  Editors:  nano <file>   vi <file>   (vim-tiny is installed as vi)
 
   Reboot:   reboot
   Poweroff: poweroff
