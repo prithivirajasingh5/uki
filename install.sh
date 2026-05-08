@@ -55,7 +55,7 @@ build() {
     echo "==> Building rescue-$VARIANT.efi (this takes ~5 min for mini, ~15 min for full)."
     echo "    Root access is required for debootstrap and kernel module copy."
     echo ""
-    sudo make -C "$RESCUE_DIR" VARIANT="$VARIANT" all
+    sudo make -C "$RESCUE_DIR" "$VARIANT"
 }
 
 # ── done ─────────────────────────────────────────────────────────────────────
