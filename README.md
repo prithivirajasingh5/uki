@@ -53,6 +53,18 @@ tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
 
 ---
 
+## Requirements
+
+- Build host: Debian or Ubuntu, x86_64
+- Build disk space: ~90 MB for mini, ~2 GB for full
+- Rescue target: UEFI firmware (BIOS/MBR not supported)
+- Rescue target RAM: ~1 GB for mini, ~2 GB for full
+
+Build-time packages installed automatically by `make deps`:
+`debootstrap`, `squashfs-tools`, `systemd-ukify`, `busybox-static`
+
+---
+
 ## Install on Linux
 
 **4 steps. ~5 minutes.**
@@ -387,16 +399,6 @@ sudo make all                       # rebuild both variants
 sudo make uki VARIANT=mini          # rebuild only the EFI (rootfs/squashfs unchanged)
 sudo make clean && sudo make all    # full clean rebuild of both variants
 ```
-
-### Requirements
-
-- Build host: Debian or Ubuntu, x86_64
-- Build disk space: ~500 MB for mini, ~2 GB for full
-- Rescue target: UEFI firmware (BIOS/MBR not supported)
-- Rescue target RAM: ~1 GB for mini, ~2 GB for full
-
-Build-time packages installed automatically by `make deps`:
-`debootstrap`, `squashfs-tools`, `systemd-ukify`, `busybox-static`
 
 ### How it works
 
