@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ROOTFS="${ROOTFS:-work/full/rootfs}"
 VARIANT="${VARIANT:-full}"
 
@@ -132,6 +133,7 @@ systemctl --root="$ROOTFS" mask nvmf-autoconnect.service
 for tty in tty1 ttyS0; do
     dir="$ROOTFS/etc/systemd/system/getty@${tty}.service.d"
     mkdir -p "$dir"
+    # shellcheck disable=SC2016  # $TERM is a literal string for the systemd unit, not a shell variable
     printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin root --noclear %%I $TERM\n' \
         > "$dir/autologin.conf"
 done
@@ -156,9 +158,9 @@ printf 'export LESS="-q"\n' > "$ROOTFS/etc/profile.d/nobell.sh"
 
 # readme command — type 'readme' at the rescue shell for a quick reference
 if [ "$VARIANT" = "mini" ]; then
-    install -m 0755 src/rescue-readme-mini "$ROOTFS/usr/local/bin/readme"
+    install -m 0755 "$SCRIPT_DIR/rescue-readme-mini" "$ROOTFS/usr/local/bin/readme"
 else
-    install -m 0755 src/rescue-readme "$ROOTFS/usr/local/bin/readme"
+    install -m 0755 "$SCRIPT_DIR/rescue-readme" "$ROOTFS/usr/local/bin/readme"
 fi
 
 # ── kernel modules ───────────────────────────────────────────────────────────
