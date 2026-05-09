@@ -258,9 +258,9 @@ EOF
             [ -d "$src" ] || continue
             cp -a "$src" "$ROOTFS/lib/firmware/"
         done
-        # Top-level .bin firmware files used by common Intel/Realtek NICs
-        find /lib/firmware -maxdepth 1 -name "*.bin" -o -name "*.fw" 2>/dev/null \
-            | xargs -I{} cp -n {} "$ROOTFS/lib/firmware/" 2>/dev/null || true
+        # Top-level .bin/.fw files used by common Intel/Realtek NICs
+        find /lib/firmware -maxdepth 1 \( -name "*.bin" -o -name "*.fw" \) -print0 2>/dev/null \
+            | xargs -0 -I{} cp -n {} "$ROOTFS/lib/firmware/" 2>/dev/null || true
     fi
 fi
 
