@@ -240,16 +240,27 @@ nameserver 8.8.8.8
 nameserver 1.1.1.1
 EOF
 
-    # Firmware — WiFi, NIC controllers, etc.
+    # Firmware — copy only what a rescue environment actually needs:
+    # WiFi (Intel iwlwifi, Atheros, Realtek, MediaTek, Broadcom),
+    # Ethernet NICs (Intel e1000, igb, ixgbe), and USB network adapters.
+    # GPU, datacenter, and audio firmware are intentionally omitted.
     if [ -d /lib/firmware ]; then
-        echo "Copying firmware files — this may take a minute..."
+        echo "Copying rescue-relevant firmware files..."
         mkdir -p "$ROOTFS/lib/firmware"
-        cp -a /lib/firmware/. "$ROOTFS/lib/firmware/"
-        FW="$ROOTFS/lib/firmware"
-        rm -rf "$FW/nvidia" "$FW/amdgpu" "$FW/radeon" "$FW/i915" "$FW/xe"
-        rm -rf "$FW/mellanox" "$FW/mrvl" "$FW/netronome" "$FW/qed" "$FW/dpaa2"
-        rm -rf "$FW/qcom"
-        rm -rf "$FW/cirrus"
+        for fw_dir in \
+            iwlwifi ath ath10k ath11k ath12k rtw88 rtw89 rtl_nic \
+            mt7601u mt76 brcm cypress \
+            e1000 e1000e igb ixgbe i219 \
+            r8169 r8152 \
+            bnx2 tg3 \
+        ; do
+            src="/lib/firmware/$fw_dir"
+            [ -d "$src" ] || continue
+            cp -a "$src" "$ROOTFS/lib/firmware/"
+        done
+        # Top-level .bin firmware files used by common Intel/Realtek NICs
+        find /lib/firmware -maxdepth 1 -name "*.bin" -o -name "*.fw" 2>/dev/null \
+            | xargs -I{} cp -n {} "$ROOTFS/lib/firmware/" 2>/dev/null || true
     fi
 fi
 

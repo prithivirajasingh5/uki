@@ -10,11 +10,14 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: write
 
     steps:
       - uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Install build dependencies
         run: sudo apt-get update -qq && sudo apt-get install -y debootstrap squashfs-tools systemd-ukify busybox-static

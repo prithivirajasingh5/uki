@@ -9,10 +9,12 @@ if [ ! -f "$ROOTFS/.done" ]; then
     exit 1
 fi
 
-echo "Compressing $ROOTFS -> $SQUASHFS ..."
+SQUASHFS_LEVEL="${SQUASHFS_LEVEL:-6}"
+echo "Compressing $ROOTFS -> $SQUASHFS (zstd level $SQUASHFS_LEVEL, $(nproc) processors)..."
 mksquashfs "$ROOTFS" "$SQUASHFS" \
     -comp zstd \
-    -Xcompression-level 15 \
+    -Xcompression-level "$SQUASHFS_LEVEL" \
+    -processors "$(nproc)" \
     -noappend \
     -no-progress \
     -wildcards \
