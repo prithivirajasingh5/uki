@@ -55,7 +55,7 @@ tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
 ## Requirements
 
 - Build host: Debian or Ubuntu, x86_64
-- Build disk space: ~90 MB for mini, ~2 GB for full
+- Build disk space: ~90 MB for mini, ~200 MB for full
 - Rescue target: UEFI firmware (BIOS/MBR not supported)
 - Rescue target RAM: ~1 GB for both variants
 
