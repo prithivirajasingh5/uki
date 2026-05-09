@@ -41,6 +41,7 @@ PACKAGES_COMMON=(
     pciutils            # lspci
     usbutils            # lsusb
     lshw                # full hardware inventory
+    dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
 
     # File tools
     findutils           # find
@@ -62,7 +63,6 @@ PACKAGES_FULL=(
 
     # Networking + file transfer
     curl
-    dmidecode           # BIOS/DMI tables — RAM slots, serial numbers
 
     xz-utils            # decompress .xz archives
 

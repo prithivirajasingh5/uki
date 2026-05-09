@@ -38,8 +38,7 @@ your existing OS — no USB drive needed at rescue time.
 | SSH / rsync | — | ✓ |
 | Network tools | — | ✓ |
 | Hardware info (lspci, lshw) | ✓ | ✓ |
-| Extended hardware info (lsusb, dmidecode) | — | ✓ |
-| Silent terminal (no bell) | ✓ | ✓ |
+| Extended hardware info (lsusb, dmidecode) | ✓ | ✓ |
 
 **Start with mini.** It fits on almost any EFI partition and covers the most common rescue
 tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
