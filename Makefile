@@ -8,7 +8,7 @@ INITRAMFS := $(WORK)/initramfs.cpio.gz
 OUTPUT    := rescue-$(VARIANT).efi
 
 # Packages that must be present on the build host
-HOST_PKGS := debootstrap squashfs-tools systemd-ukify busybox-static
+HOST_PKGS := debootstrap squashfs-tools systemd-ukify systemd-boot-efi busybox-static
 
 .PHONY: all deps full mini rootfs squashfs initramfs uki run clean test
 

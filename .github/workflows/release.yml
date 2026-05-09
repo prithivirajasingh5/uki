@@ -20,7 +20,7 @@ jobs:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Install build dependencies
-        run: sudo apt-get update -qq && sudo apt-get install -y debootstrap squashfs-tools systemd-ukify busybox-static
+        run: sudo apt-get update -qq && sudo apt-get install -y debootstrap squashfs-tools systemd-ukify systemd-boot-efi busybox-static
 
       - name: Build both variants
         run: sudo make all
