@@ -51,8 +51,8 @@ separate partition. This means:
 - zstd compression keeps the image compact (see README for current sizes per variant)
 
 The trade-off: the full rootfs is extracted into tmpfs on every boot. On a machine
-with 4 GB RAM this uses ~180 MB. The mini variant requires ~1 GB RAM; the full
-variant requires ~2 GB RAM. Machines below these thresholds may fail to boot.
+with 4 GB RAM this uses ~180 MB. Both variants require ~1 GB RAM. Machines below
+this threshold may fail to boot.
 
 ## Why tmpfs (not a squashfs loop mount)
 

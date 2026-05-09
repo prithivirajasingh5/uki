@@ -26,7 +26,7 @@ your existing OS — no USB drive needed at rescue time.
 | | `rescue-mini.efi` | `rescue-full.efi` |
 |---|---|---|
 | EFI size | ~90 MB | ~200 MB |
-| RAM needed | ~1 GB | ~2 GB |
+| RAM needed | ~1 GB | ~1 GB |
 | Disk / partition / format | ✓ | ✓ |
 | EFI boot repair (efibootmgr, grub) | ✓ | ✓ |
 | btrfs, ext4, FAT filesystems | ✓ | ✓ |
@@ -57,7 +57,7 @@ tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
 - Build host: Debian or Ubuntu, x86_64
 - Build disk space: ~90 MB for mini, ~2 GB for full
 - Rescue target: UEFI firmware (BIOS/MBR not supported)
-- Rescue target RAM: ~1 GB for mini, ~2 GB for full
+- Rescue target RAM: ~1 GB for both variants
 
 Build-time packages installed automatically by `make deps`:
 `debootstrap`, `squashfs-tools`, `systemd-ukify`, `busybox-static`

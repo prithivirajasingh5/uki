@@ -39,7 +39,7 @@ jobs:
             | File | Description |
             |------|-------------|
             | `rescue-mini.efi` | Minimal rescue: disk tools, EFI repair, filesystem tools (~90 MB, ~1 GB RAM) |
-            | `rescue-full.efi` | Full rescue: adds WiFi, SSH, LVM, LUKS, data recovery (~700 MB, ~2 GB RAM) |
+            | `rescue-full.efi` | Full rescue: adds WiFi, SSH, LVM, LUKS, data recovery (~200 MB, ~1 GB RAM) |
             | `SHA256SUMS` | SHA-256 checksums for both files |
 
             See [README](https://github.com/${{ github.repository }}/blob/master/README.md) for install instructions.
