@@ -25,7 +25,7 @@ your existing OS — no USB drive needed at rescue time.
 
 | | `rescue-mini.efi` | `rescue-full.efi` |
 |---|---|---|
-| EFI size | ~90 MB | ~700 MB |
+| EFI size | ~90 MB | ~200 MB |
 | RAM needed | ~1 GB | ~2 GB |
 | Disk / partition / format | ✓ | ✓ |
 | EFI boot repair (efibootmgr, grub) | ✓ | ✓ |
@@ -46,9 +46,9 @@ tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
 **Upgrade to full** only if you specifically need WiFi, SSH, LVM, LUKS, or data recovery.
 
 > **EFI partition reality check:** Most OEM Windows laptops ship with a 100–260 MB EFI
-> partition. `rescue-full.efi` at ~700 MB won't fit. Even Linux installers typically
-> create 512 MB ESPs, which is still tight. **mini is the right choice for on-disk
-> installation.**
+> partition. `rescue-full.efi` at ~200 MB fits on 260 MB+ ESPs but may be tight on
+> smaller ones. Linux installers typically create 512 MB ESPs where full fits comfortably.
+> **mini is the safest choice for on-disk installation on OEM hardware.**
 
 ---
 
@@ -77,7 +77,7 @@ mkdir -p ~/rescue-efi
 wget -O ~/rescue-efi/rescue-mini.efi \
     https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-mini.efi
 
-# full (~700 MB) — only if you need WiFi, SSH, LVM, data recovery
+# full (~200 MB) — only if you need WiFi, SSH, LVM, data recovery
 wget -O ~/rescue-efi/rescue-full.efi \
     https://github.com/prithivirajasingh5/uki/releases/latest/download/rescue-full.efi
 ```
@@ -124,7 +124,7 @@ and reboot again. Your key is now trusted by the firmware. Continue to Step 3.
 
 ### Step 3 of 4 — Install on the EFI partition
 
-Check free space on your EFI partition (~90 MB needed for mini, ~700 MB for full):
+Check free space on your EFI partition (~90 MB needed for mini, ~200 MB for full):
 
 ```bash
 df -h /boot/efi
@@ -224,7 +224,7 @@ exit
 ```
 
 Look for the **System** type partition. rescue-mini (~90 MB) fits on most OEM ESPs.
-rescue-full (~700 MB) almost certainly does not — use mini for on-disk install.
+rescue-full (~200 MB) fits on 260 MB+ ESPs — check your partition size before copying.
 
 ### Step 3 of 6 — Download rescue-mini.efi on Windows
 
