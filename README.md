@@ -32,13 +32,13 @@ your existing OS — no USB drive needed at rescue time.
 | btrfs, ext4, FAT filesystems | ✓ | ✓ |
 | File editor (nano) | ✓ | ✓ |
 | Chroot into installed system | ✓ | ✓ |
+| Hardware info (lspci, lshw) | ✓ | ✓ |
+| Extended hardware info (lsusb, dmidecode) | ✓ | ✓ |
 | LVM / LUKS | — | ✓ |
 | Data recovery (ddrescue, testdisk) | — | ✓ |
 | WiFi (iwd) | — | ✓ |
 | SSH / rsync | — | ✓ |
 | Network tools | — | ✓ |
-| Hardware info (lspci, lshw) | ✓ | ✓ |
-| Extended hardware info (lsusb, dmidecode) | ✓ | ✓ |
 
 **Start with mini.** It fits on almost any EFI partition and covers the most common rescue
 tasks: disk partitioning, filesystem repair, EFI boot repair, chroot.
