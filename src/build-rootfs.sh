@@ -203,9 +203,11 @@ else
         done
 
         # Filesystem modules: btrfs.ko + its dependencies (raid6_pq, xor, blake2b).
+        # fs/nls provides nls_iso8859_1.ko and friends — required by the FAT driver
+        # to mount EFI/FAT partitions (without it you get "IO charset not found").
         # Copying kernel/lib and kernel/crypto wholesale (~920 KB) avoids hardcoding
         # specific filenames that change across kernel versions.
-        for mod_dir in fs/btrfs lib crypto; do
+        for mod_dir in fs/btrfs fs/nls lib crypto; do
             src="/lib/modules/$KVER/kernel/$mod_dir"
             [ -d "$src" ] || continue
             dest="$ROOTFS/lib/modules/$KVER/kernel/$mod_dir"
