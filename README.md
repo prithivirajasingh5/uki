@@ -351,6 +351,24 @@ sbsign --key rescue.key --cert rescue.crt \
 
 Type `readme` at the rescue shell for a quick reference card.
 
+### Restoring the dev environment on a new machine
+
+```bash
+# 1. Install prerequisites
+sudo apt install git gpg git-crypt
+
+# 2. Import your GPG private key (skip if already imported)
+gpg --import your-private-key.gpg
+
+# 3. Clone and unlock — .env decrypts automatically
+git clone git@github.com:prithivirajasingh5/uki.git
+cd uki
+git-crypt unlock
+
+# 4. Build
+sudo make all
+```
+
 ### Build from source
 
 Instead of downloading a pre-built binary, you can build locally on Debian/Ubuntu x86_64:
